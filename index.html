@@ -3,10 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Victor Xyp Ch</title>
+    <title>Chess Club Rankings</title>
+<style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2a2a2a;
+            color: #e2e2e2;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        h1 {
+            color: #e2b714;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            margin: 0 auto;
+            border-collapse: collapse;
+        }
+
+        
+        /* Media query for desktops and larger screens */
+        @media (min-width: 768px) {
+            table {
+                width: 50%;  /* 50% width on larger screens */
+            }
+        }
+
+        table, th, td {
+            border: 1px solid #444;
+        }
+
+        th, td {
+            padding: 15px 25px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #e2b714;
+            color: #333;
+        }
+
+        tr:nth-child(even) {
+            background-color: #3a3a3a;
+        }
+
+        tr:hover {
+            background-color: #505050;
+        }
+    </style>
 </head>
 <body>
-    <a href="numbers-to-lao-words-converter/">ແປງໂຕເລກເປັນຕົວໜັງສື (numbers-to-lao-words-converter)</a>
-    
+    <h1>Chess Club Rankings</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Total Points</th>
+            </tr>
+        </thead>
+        <tbody id="playersTable">
+            <!-- Data will be populated here by JavaScript -->
+        </tbody>
+    </table>
+
+    <script>
+  var playersData = [
+            {"name": "Tigger", "total": 13.5},
+            {"name": "marvin", "total": 12},
+            {"name": "kayden", "total": 10.5},
+            {"name": "tonka", "total": 8},
+            {"name": "roy", "total": 8},
+            {"name": "aek", "total": 6.5},
+            {"name": "alwin", "total": 6},
+            {"name": "dandy", "total": 5},
+            {"name": "eric", "total": 5},
+            {"name": "naphat", "total": 4},
+            {"name": "alieng", "total": 1},
+            {"name": "ayyan", "total": 0.5}
+        ];
+
+        var tableBody = document.getElementById('playersTable');
+
+        for (var i = 0; i < playersData.length; i++) {
+            var row = tableBody.insertRow();
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            cell1.innerHTML = playersData[i].name;
+            cell2.innerHTML = playersData[i].total;
+        }
+    </script>
 </body>
 </html>
+
