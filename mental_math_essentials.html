@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Essential Mental Math</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;600;700;800&display=swap');
+
+:root {
+  --bg: #f5f0e8;
+  --ink: #1a1208;
+  --mid: #6b5e45;
+  --faint: #e2d9c8;
+  --card: #fff9f0;
+  --gold: #d4860a;
+  --green: #2d7a4f;
+  --red: #c0392b;
+  --blue: #1a5f9e;
+  --purple: #6b3fa0;
+  --shadow: 0 2px 0 #1a120820;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  background-image:
+    radial-gradient(circle at 20% 20%, #e8dcc820 0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231a1208' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  color: var(--ink);
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.app-header {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.app-logo {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--mid);
+  text-transform: uppercase;
+}
+.back-link {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--mid);
+  text-decoration: none;
+  letter-spacing: 1px;
+  padding: 6px 14px;
+  border: 1.5px solid var(--faint);
+  border-radius: 100px;
+  transition: border-color .15s, color .15s;
+}
+.back-link:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── HERO ── */
+.hero {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px 24px;
+}
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -1px;
+}
+.hero h1 span { color: var(--gold); }
+.hero p {
+  margin-top: 12px;
+  font-size: 1.05rem;
+  color: var(--mid);
+  max-width: 560px;
+}
+
+/* ── FILTER TABS ── */
+.filter-bar {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px 24px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.filter-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  border-radius: 100px;
+  border: 1.5px solid var(--faint);
+  background: transparent;
+  color: var(--mid);
+  cursor: pointer;
+  transition: all .15s;
+}
+.filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+.filter-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+/* ── MAIN GRID ── */
+.main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* ── SECTION ── */
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-bottom: 12px;
+}
+
+/* ── CARDS ── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.card {
+  background: var(--card);
+  border: 1.5px solid var(--faint);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  transition: border-color .15s, transform .1s;
+  cursor: pointer;
+}
+.card:hover { border-color: var(--gold); transform: translateY(-2px); }
+.card.open { border-color: var(--gold); }
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.card-title {
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1.2;
+  flex: 1;
+}
+.card-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 100px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.card-preview {
+  margin-top: 10px;
+  font-size: 0.88rem;
+  color: var(--mid);
+  line-height: 1.5;
+}
+.card-body {
+  display: none;
+  margin-top: 16px;
+  border-top: 1.5px solid var(--faint);
+  padding-top: 16px;
+}
+.card.open .card-body { display: block; }
+
+/* ── TRICK STEPS ── */
+.trick-steps { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.trick-step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.step-text { font-size: 0.88rem; line-height: 1.5; color: var(--ink); }
+.step-text em { font-style: normal; color: var(--gold); font-weight: 600; }
+
+/* ── EXAMPLE BOX ── */
+.example {
+  background: var(--faint);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-top: 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+.example .label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-bottom: 4px;
+}
+
+/* ── FORMULA ── */
+.formula {
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.9rem;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+/* ── TABLE ── */
+.ref-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 0.85rem;
+}
+.ref-table th {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--mid);
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1.5px solid var(--faint);
+}
+.ref-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--faint);
+  line-height: 1.4;
+}
+.ref-table tr:last-child td { border-bottom: none; }
+.ref-table td:first-child { font-family: 'DM Mono', monospace; color: var(--gold); font-weight: 500; }
+
+/* ── HIGHLIGHT CHIPS ── */
+.why-chip {
+  display: inline-block;
+  background: #fff3cd;
+  border: 1px solid #f0c33c;
+  color: #7a5c00;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+/* ── COLOR THEMES ── */
+.theme-gold .card-icon { background: #fff3cd; }
+.theme-gold .card-tag { background: #fff3cd; color: #7a5c00; }
+.theme-green .card-icon { background: #d4edda; }
+.theme-green .card-tag { background: #d4edda; color: #155724; }
+.theme-blue .card-icon { background: #d0e8ff; }
+.theme-blue .card-tag { background: #d0e8ff; color: #0c3660; }
+.theme-red .card-icon { background: #fde8e8; }
+.theme-red .card-tag { background: #fde8e8; color: #7b1a1a; }
+.theme-purple .card-icon { background: #ede0f5; }
+.theme-purple .card-tag { background: #ede0f5; color: #3d1f60; }
+
+/* ── QUICK REF WIDE CARD ── */
+.wide-card {
+  background: var(--card);
+  border: 1.5px solid var(--faint);
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+}
+.wide-card .section-label { margin-bottom: 16px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0 32px; }
+@media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+/* ── SEARCH ── */
+.search-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px 16px;
+}
+.search-input {
+  width: 100%;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: 1.5px solid var(--faint);
+  background: var(--card);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color .15s;
+}
+.search-input:focus { border-color: var(--gold); }
+.search-input::placeholder { color: var(--mid); }
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <span class="app-logo">Mental Math</span>
+  <a href="index.html" class="back-link">← Home</a>
+</div>
+
+<div class="hero">
+  <h1>Essential <span>Mental Math</span></h1>
+  <p>Core tricks, shortcuts, and reference tables to calculate faster in your head.</p>
+</div>
+
+<div class="search-wrap">
+  <input class="search-input" type="text" placeholder="Search tricks, rules, or topics…" id="searchInput" oninput="filterCards()"/>
+</div>
+
+<div class="filter-bar" id="filterBar">
+  <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+  <button class="filter-btn" onclick="setFilter('addition', this)">Addition</button>
+  <button class="filter-btn" onclick="setFilter('multiplication', this)">Multiplication</button>
+  <button class="filter-btn" onclick="setFilter('division', this)">Division</button>
+  <button class="filter-btn" onclick="setFilter('estimation', this)">Estimation</button>
+  <button class="filter-btn" onclick="setFilter('fractions', this)">Fractions</button>
+  <button class="filter-btn" onclick="setFilter('powers', this)">Powers</button>
+</div>
+
+<div class="main" id="mainContent">
+
+  <!-- ── ADDITION & SUBTRACTION ── -->
+  <div>
+    <div class="section-label">Addition &amp; Subtraction</div>
+    <div class="cards">
+
+      <div class="card theme-gold" data-tags="addition subtraction" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">➕</div>
+          <div class="card-title">Left-to-Right Addition</div>
+          <span class="card-tag">add</span>
+        </div>
+        <div class="card-preview">Add the largest place value first, carry forward.</div>
+        <div class="card-body">
+          <div class="trick-steps">
+            <div class="trick-step"><div class="step-num">1</div><div class="step-text">Start with the <em>hundreds</em> (or largest digit).</div></div>
+            <div class="trick-step"><div class="step-num">2</div><div class="step-text">Add <em>tens</em>, running total in your head.</div></div>
+            <div class="trick-step"><div class="step-num">3</div><div class="step-text">Add <em>ones</em> last.</div></div>
+          </div>
+          <div class="example">
+            <div class="label">Example — 348 + 276</div>
+            300+200 = <strong>500</strong><br>
+            500+40+70 = <strong>610</strong><br>
+            610+8+6 = <strong>624</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card theme-gold" data-tags="addition subtraction" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">🔄</div>
+          <div class="card-title">Complement to 10/100</div>
+          <span class="card-tag">add</span>
+        </div>
+        <div class="card-preview">Find what each number needs to reach the next round number.</div>
+        <div class="card-body">
+          <div class="trick-steps">
+            <div class="trick-step"><div class="step-num">1</div><div class="step-text">Round one number <em>up</em> to a nice multiple of 10 or 100.</div></div>
+            <div class="trick-step"><div class="step-num">2</div><div class="step-text">Subtract the <em>same amount</em> from the other number.</div></div>
+            <div class="trick-step"><div class="step-num">3</div><div class="step-text">Add the adjusted pair.</div></div>
+          </div>
+          <div class="example">
+            <div class="label">Example — 67 + 38</div>
+            67 + 38 → 67 + <strong>40</strong> − 2 = <strong>105</strong>
+          </div>
+          <div class="example">
+            <div class="label">Example — 293 + 148</div>
+            <strong>300</strong> + 148 − 7 = <strong>441</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card theme-gold" data-tags="addition subtraction" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">➖</div>
+          <div class="card-title">Subtraction by Addition</div>
+          <span class="card-tag">subtract</span>
+        </div>
+        <div class="card-preview">Count up from the smaller number instead of subtracting down.</div>
+        <div class="card-body">
+          <div class="trick-steps">
+            <div class="trick-step"><div class="step-num">1</div><div class="step-text">Start at the <em>smaller</em> number.</div></div>
+            <div class="trick-step"><div class="step-num">2</div><div class="step-text">Count up to the next round number, note the jump.</div></div>
+            <div class="trick-step"><div class="step-num">3</div><div class="step-text">Continue to the <em>larger</em> number; sum all jumps.</div></div>
+          </div>
+          <div class="example">
+            <div class="label">Example — 1003 − 867</div>
+            867 → 900: +33<br>
+            900 → 1000: +100<br>
+            1000 → 1003: +3<br>
+            Total: <strong>136</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card theme-gold" data-tags="addition subtraction" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">🔢</div>
+          <div class="card-title">Double &amp; Halve Trick</div>
+          <span class="card-tag">add</span>
+        </div>
+        <div class="card-preview">Double one number, halve the other to get an easier sum.</div>
+        <div class="card-body">
+          <div class="trick-steps">
+            <div class="trick-step"><div class="step-num">1</div><div class="step-text"><em>Double</em> the smaller, <em>halve</em> the larger (for even numbers).</div></div>
+            <div class="trick-step"><div class="step-num">2</div><div class="step-text">If the result is simpler, use it directly.</div></div>
+          </div>
+          <div class="example">
+            <div class="label">Example — 16 + 34</div>
+            16→32, 34→17 → 32+17 = <strong>49</strong>✓<br>
+            (same as 16+34=<strong>50</strong>? No — better: 16+34 directly = <strong>50</strong>)
+          </div>
+          <div class="why-chip">Best for × not +. See Multiplication section.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── MULTIPLICATION ── -->
+  <div>
+    <div class="section-label">Multiplication</div>
+    <div class="cards">
+
+      <div class="card theme-green" data-tags="multiplication" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">✖️</div>
+          <div class="card-title">Multiply by 5</div>
+          <span class="card-tag">×</span>
+        </div>
+        <div class="card-preview">÷2 then ×10 is always faster.</div>
+        <div class="card-body">
+          <div class="formula">n × 5 = (n ÷ 2) × 10</div>
+          <div class="example">
+            <div class="label">Examples</div>
+            48 × 5 = 24 × 10 = <strong>240</strong><br>
+            73 × 5 = 36.5 × 10 = <strong>365</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card theme-green" data-tags="multiplication" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">✖️</div>
+          <div class="card-title">Multiply by 9</div>
+          <span class="card-tag">×</span>
+        </div>
+        <div class="card-preview">×10 then subtract the number once.</div>
+        <div class="card-body">
+          <div class="formula">n × 9 = (n × 10) − n</div>
+          <div class="example">
+            <div class="label">Examples</div>
+            47 × 9 = 470 − 47 = <strong>423</strong><br>
+            83 × 9 = 830 − 83 = <strong>747</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card theme-green" data-tags="multiplication" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">✖️</div>
+          <div class="card-title">Multiply by 11</div>
+          <span class="card-tag">×</span>
+        </div>
+        <div class="card-preview">For 2-digit numbers: outer digits stay, middle is their sum.</div>
+        <div class="card-body">
+          <div class="trick-steps">
+            <div class="trick-step"><div class="step-num">1</div><div class="step-text">Write the <em>first digit</em>, then the <em>sum of both digits</em>, then the <em>last digit</em>.</div></div>
+            <div class="trick-step"><div class="step-num">2</div><div class="step-text">If the middle sum ≥ 10, carry 1 to the first digit.</div></div>
+          </div>
+          <div class="example">
+            <div class="label">Examples</div>
+            53 × 11 = 5_(5+3)_3 = <strong>583</strong><br>
+            78 × 11 = 7_(7+8)_8 = 7_15_8 → <strong>858</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card theme-green" data-tags="multiplication" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">✖️</div>
+          <div class="card-title">Multiply by 25</div>
+          <span class="card-tag">×</span>
+        </div>
+        <div class="card-preview">÷4 then ×100 (25 = 100/4).</div>
+        <div class="card-body">
+          <div class="formula">n × 25 = (n ÷ 4) × 100</div>
+          <div class="example">
+            <div class="label">Examples</div>
+            36 × 25 = 9 × 100 = <strong>900</strong><br>
+            52 × 25 = 13 × 100 = <strong>1300</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card theme-green" data-tags="multiplication" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">✖️</div>
+          <div class="card-title">Double &amp; Halve</div>
+          <span class="card-tag">×</span>
+        </div>
+        <div class="card-preview">Keep halving one factor and doubling the other until easy.</div>
+        <div class="card-body">
+          <div class="trick-steps">
+            <div class="trick-step"><div class="step-num">1</div><div class="step-text"><em>Halve</em> the trickier number (if even).</div></div>
+            <div class="trick-step"><div class="step-num">2</div><div class="step-text"><em>Double</em> the other number.</div></div>
+            <div class="trick-step"><div class="step-num">3</div><div class="step-text">Repeat until one factor is 1 or trivially easy.</div></div>
+          </div>
+          <div class="example">
+            <div class="label">Example — 32 × 15</div>
+            32×15 → 16×30 → 8×60 → 4×120 → 2×240 → 1×<strong>480</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card theme-green" data-tags="multiplication" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">✖️</div>
+          <div class="card-title">FOIL for 2-Digit × 2-Digit</div>
+          <span class="card-tag">×</span>
+        </div>
+        <div class="card-preview">Split both numbers and use the distributive property.</div>
+        <div class="card-body">
+          <div class="trick-steps">
+            <div class="trick-step"><div class="step-num">1</div><div class="step-text">Split: <em>(a+b)(c+d) = ac + ad + bc + bd</em>.</div></div>
+            <div class="trick-step"><div class="step-num">2</div><div class="step-text">Choose splits to give round numbers.</div></div>
+          </div>
+          <div class="example">
+            <div class="label">Example — 37 × 43</div>
+            = (40−3)(40+3)<br>
+            = 40² − 3² = 1600 − 9 = <strong>1591</strong>
+          </div>
+          <div class="example">
+            <div class="label">Example — 23 × 47</div>
+            = 23×(50−3) = 1150 − 69 = <strong>1081</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card theme-green" data-tags="multiplication" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">🔲</div>
+          <div class="card-title">Squaring Numbers Ending in 5</div>
+          <span class="card-tag">×</span>
+        </div>
+        <div class="card-preview">Multiply the leading digit by the next integer, append 25.</div>
+        <div class="card-body">
+          <div class="formula">(n5)² = n×(n+1) | 25</div>
+          <div class="example">
+            <div class="label">Examples</div>
+            35² = 3×4 | 25 = <strong>1225</strong><br>
+            75² = 7×8 | 25 = <strong>5625</strong><br>
+            95² = 9×10 | 25 = <strong>9025</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card theme-green" data-tags="multiplication" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">🔲</div>
+          <div class="card-title">Near-Square Shortcut</div>
+          <span class="card-tag">×</span>
+        </div>
+        <div class="card-preview">a² − b² = (a+b)(a−b) — works backwards too.</div>
+        <div class="card-body">
+          <div class="formula">x × y = ((x+y)/2)² − ((x−y)/2)²</div>
+          <div class="example">
+            <div class="label">Example — 18 × 22</div>
+            avg = 20, diff = 2<br>
+            = 20² − 2² = 400 − 4 = <strong>396</strong>
+          </div>
+          <div class="example">
+            <div class="label">Example — 31 × 29</div>
+            = 30² − 1² = 900 − 1 = <strong>899</strong>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── DIVISION ── -->
+  <div>
+    <div class="section-label">Division</div>
+    <div class="cards">
+
+      <div class="card theme-blue" data-tags="division" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">➗</div>
+          <div class="card-title">Divisibility Rules</div>
+          <span class="card-tag">÷</span>
+        </div>
+        <div class="card-preview">Instantly know if a number divides evenly.</div>
+        <div class="card-body">
+          <table class="ref-table">
+            <tr><th>Divisor</th><th>Rule</th></tr>
+            <tr><td>2</td><td>Last digit is even</td></tr>
+            <tr><td>3</td><td>Digit sum divisible by 3</td></tr>
+            <tr><td>4</td><td>Last 2 digits divisible by 4</td></tr>
+            <tr><td>5</td><td>Ends in 0 or 5</td></tr>
+            <tr><td>6</td><td>Divisible by both 2 and 3</td></tr>
+            <tr><td>7</td><td>Double last digit, subtract from rest; repeat</td></tr>
+            <tr><td>8</td><td>Last 3 digits divisible by 8</td></tr>
+            <tr><td>9</td><td>Digit sum divisible by 9</td></tr>
+            <tr><td>11</td><td>Alternating digit sum divisible by 11</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card theme-blue" data-tags="division" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">➗</div>
+          <div class="card-title">Divide by 5</div>
+          <span class="card-tag">÷</span>
+        </div>
+        <div class="card-preview">Multiply by 2, then divide by 10.</div>
+        <div class="card-body">
+          <div class="formula">n ÷ 5 = (n × 2) ÷ 10</div>
+          <div class="example">
+            <div class="label">Examples</div>
+            340 ÷ 5 = 680 ÷ 10 = <strong>68</strong><br>
+            85 ÷ 5 = 170 ÷ 10 = <strong>17</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card theme-blue" data-tags="division" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">➗</div>
+          <div class="card-title">Divide by 25</div>
+          <span class="card-tag">÷</span>
+        </div>
+        <div class="card-preview">Multiply by 4, then divide by 100.</div>
+        <div class="card-body">
+          <div class="formula">n ÷ 25 = (n × 4) ÷ 100</div>
+          <div class="example">
+            <div class="label">Examples</div>
+            375 ÷ 25 = 1500 ÷ 100 = <strong>15</strong><br>
+            225 ÷ 25 = 900 ÷ 100 = <strong>9</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card theme-blue" data-tags="division" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">➗</div>
+          <div class="card-title">Long Division Shortcut</div>
+          <span class="card-tag">÷</span>
+        </div>
+        <div class="card-preview">Break the dividend into parts that divide cleanly.</div>
+        <div class="card-body">
+          <div class="trick-steps">
+            <div class="trick-step"><div class="step-num">1</div><div class="step-text">Find the <em>largest multiple</em> of the divisor ≤ dividend.</div></div>
+            <div class="trick-step"><div class="step-num">2</div><div class="step-text">Subtract, then divide the <em>remainder</em>.</div></div>
+          </div>
+          <div class="example">
+            <div class="label">Example — 672 ÷ 8</div>
+            640 ÷ 8 = 80<br>
+            32 ÷ 8 = 4<br>
+            Total: <strong>84</strong>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── ESTIMATION ── -->
+  <div>
+    <div class="section-label">Estimation</div>
+    <div class="cards">
+
+      <div class="card theme-red" data-tags="estimation" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">≈</div>
+          <div class="card-title">Round &amp; Adjust</div>
+          <span class="card-tag">est</span>
+        </div>
+        <div class="card-preview">Round to the nearest easy number, then correct the error.</div>
+        <div class="card-body">
+          <div class="trick-steps">
+            <div class="trick-step"><div class="step-num">1</div><div class="step-text">Round each number to the nearest <em>10, 100, or power of 2</em>.</div></div>
+            <div class="trick-step"><div class="step-num">2</div><div class="step-text">Calculate with the rounded numbers.</div></div>
+            <div class="trick-step"><div class="step-num">3</div><div class="step-text">Add or subtract the <em>rounding error</em>.</div></div>
+          </div>
+          <div class="example">
+            <div class="label">Example — 198 × 52</div>
+            ≈ 200 × 52 = 10400<br>
+            Error: −2 × 52 = −104<br>
+            Result: <strong>10296</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card theme-red" data-tags="estimation" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">%</div>
+          <div class="card-title">Percent Tricks</div>
+          <span class="card-tag">est</span>
+        </div>
+        <div class="card-preview">Flip the percent and number for easier calculation.</div>
+        <div class="card-body">
+          <div class="trick-steps">
+            <div class="trick-step"><div class="step-num">1</div><div class="step-text"><em>x% of y = y% of x</em> — pick the easier direction.</div></div>
+            <div class="trick-step"><div class="step-num">2</div><div class="step-text">Build from 10%: find 10%, then scale.</div></div>
+          </div>
+          <div class="example">
+            <div class="label">Shortcuts</div>
+            10% of n = n ÷ 10<br>
+            5% = half of 10%<br>
+            1% = n ÷ 100<br>
+            15% = 10% + 5%<br>
+            20% = 10% × 2<br>
+            25% = n ÷ 4<br>
+            33% ≈ n ÷ 3<br>
+            75% = n − (n÷4)
+          </div>
+          <div class="example">
+            <div class="label">Example — 8% of 75</div>
+            = 75% of 8 = 6 → <strong>6</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card theme-red" data-tags="estimation" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">🎯</div>
+          <div class="card-title">Order of Magnitude</div>
+          <span class="card-tag">est</span>
+        </div>
+        <div class="card-preview">Estimate by powers of 10 — get the scale right first.</div>
+        <div class="card-body">
+          <div class="trick-steps">
+            <div class="trick-step"><div class="step-num">1</div><div class="step-text">Count digits or express as <em>a × 10ⁿ</em>.</div></div>
+            <div class="trick-step"><div class="step-num">2</div><div class="step-text">Multiply the <em>coefficients</em>, add the <em>exponents</em>.</div></div>
+            <div class="trick-step"><div class="step-num">3</div><div class="step-text">Refine if needed.</div></div>
+          </div>
+          <div class="example">
+            <div class="label">Example — 3200 × 4700</div>
+            3.2×10³ × 4.7×10³<br>
+            ≈ 3×5 × 10⁶ = <strong>15,000,000</strong><br>
+            (exact: 15,040,000)
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── FRACTIONS ── -->
+  <div>
+    <div class="section-label">Fractions &amp; Decimals</div>
+    <div class="cards">
+
+      <div class="card theme-purple" data-tags="fractions" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">½</div>
+          <div class="card-title">Fraction ↔ Decimal Reference</div>
+          <span class="card-tag">frac</span>
+        </div>
+        <div class="card-preview">Core conversions to memorize.</div>
+        <div class="card-body">
+          <table class="ref-table">
+            <tr><th>Fraction</th><th>Decimal</th><th>%</th></tr>
+            <tr><td>1/2</td><td>0.5</td><td>50%</td></tr>
+            <tr><td>1/3</td><td>0.333…</td><td>33.3%</td></tr>
+            <tr><td>2/3</td><td>0.666…</td><td>66.7%</td></tr>
+            <tr><td>1/4</td><td>0.25</td><td>25%</td></tr>
+            <tr><td>3/4</td><td>0.75</td><td>75%</td></tr>
+            <tr><td>1/5</td><td>0.2</td><td>20%</td></tr>
+            <tr><td>1/6</td><td>0.1666…</td><td>16.7%</td></tr>
+            <tr><td>1/7</td><td>0.142857…</td><td>14.3%</td></tr>
+            <tr><td>1/8</td><td>0.125</td><td>12.5%</td></tr>
+            <tr><td>1/9</td><td>0.111…</td><td>11.1%</td></tr>
+            <tr><td>1/10</td><td>0.1</td><td>10%</td></tr>
+            <tr><td>1/12</td><td>0.0833…</td><td>8.3%</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card theme-purple" data-tags="fractions" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">½</div>
+          <div class="card-title">Cross-Multiply to Compare</div>
+          <span class="card-tag">frac</span>
+        </div>
+        <div class="card-preview">Which fraction is bigger without finding common denominator.</div>
+        <div class="card-body">
+          <div class="formula">a/b vs c/d → compare a×d vs b×c</div>
+          <div class="example">
+            <div class="label">Example — 3/7 vs 5/11</div>
+            3×11 = 33<br>
+            7×5 = 35<br>
+            33 &lt; 35 → <strong>3/7 &lt; 5/11</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card theme-purple" data-tags="fractions" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">½</div>
+          <div class="card-title">Simplify Before Multiplying</div>
+          <span class="card-tag">frac</span>
+        </div>
+        <div class="card-preview">Cancel common factors across numerators and denominators first.</div>
+        <div class="card-body">
+          <div class="trick-steps">
+            <div class="trick-step"><div class="step-num">1</div><div class="step-text">Look for <em>any numerator</em> and <em>any denominator</em> sharing a factor.</div></div>
+            <div class="trick-step"><div class="step-num">2</div><div class="step-text">Cancel (cross-cancel) before multiplying.</div></div>
+          </div>
+          <div class="example">
+            <div class="label">Example — (14/9) × (3/7)</div>
+            14 and 7 share 7 → 2/9 × 3/1<br>
+            3 and 9 share 3 → 2/3 × 1/1 = <strong>2/3</strong>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── POWERS & ROOTS ── -->
+  <div>
+    <div class="section-label">Powers &amp; Roots</div>
+    <div class="cards">
+
+      <div class="card theme-gold" data-tags="powers" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">²</div>
+          <div class="card-title">Squares 1–30</div>
+          <span class="card-tag">pow</span>
+        </div>
+        <div class="card-preview">Essential squares to memorize for fast mental math.</div>
+        <div class="card-body">
+          <div class="two-col">
+            <table class="ref-table">
+              <tr><th>n</th><th>n²</th></tr>
+              <tr><td>1</td><td>1</td></tr>
+              <tr><td>2</td><td>4</td></tr>
+              <tr><td>3</td><td>9</td></tr>
+              <tr><td>4</td><td>16</td></tr>
+              <tr><td>5</td><td>25</td></tr>
+              <tr><td>6</td><td>36</td></tr>
+              <tr><td>7</td><td>49</td></tr>
+              <tr><td>8</td><td>64</td></tr>
+              <tr><td>9</td><td>81</td></tr>
+              <tr><td>10</td><td>100</td></tr>
+              <tr><td>11</td><td>121</td></tr>
+              <tr><td>12</td><td>144</td></tr>
+              <tr><td>13</td><td>169</td></tr>
+              <tr><td>14</td><td>196</td></tr>
+              <tr><td>15</td><td>225</td></tr>
+            </table>
+            <table class="ref-table">
+              <tr><th>n</th><th>n²</th></tr>
+              <tr><td>16</td><td>256</td></tr>
+              <tr><td>17</td><td>289</td></tr>
+              <tr><td>18</td><td>324</td></tr>
+              <tr><td>19</td><td>361</td></tr>
+              <tr><td>20</td><td>400</td></tr>
+              <tr><td>21</td><td>441</td></tr>
+              <tr><td>22</td><td>484</td></tr>
+              <tr><td>23</td><td>529</td></tr>
+              <tr><td>24</td><td>576</td></tr>
+              <tr><td>25</td><td>625</td></tr>
+              <tr><td>26</td><td>676</td></tr>
+              <tr><td>27</td><td>729</td></tr>
+              <tr><td>28</td><td>784</td></tr>
+              <tr><td>29</td><td>841</td></tr>
+              <tr><td>30</td><td>900</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="card theme-gold" data-tags="powers" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">2ⁿ</div>
+          <div class="card-title">Powers of 2</div>
+          <span class="card-tag">pow</span>
+        </div>
+        <div class="card-preview">Critical for CS, binary, and bit manipulation.</div>
+        <div class="card-body">
+          <table class="ref-table">
+            <tr><th>2ⁿ</th><th>Value</th></tr>
+            <tr><td>2⁰</td><td>1</td></tr>
+            <tr><td>2¹</td><td>2</td></tr>
+            <tr><td>2²</td><td>4</td></tr>
+            <tr><td>2³</td><td>8</td></tr>
+            <tr><td>2⁴</td><td>16</td></tr>
+            <tr><td>2⁵</td><td>32</td></tr>
+            <tr><td>2⁶</td><td>64</td></tr>
+            <tr><td>2⁷</td><td>128</td></tr>
+            <tr><td>2⁸</td><td>256</td></tr>
+            <tr><td>2⁹</td><td>512</td></tr>
+            <tr><td>2¹⁰</td><td>1,024 ≈ 1K</td></tr>
+            <tr><td>2²⁰</td><td>1,048,576 ≈ 1M</td></tr>
+            <tr><td>2³⁰</td><td>≈ 1B</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="card theme-gold" data-tags="powers" onclick="toggleCard(this)">
+        <div class="card-header">
+          <div class="card-icon">√</div>
+          <div class="card-title">Estimate Square Roots</div>
+          <span class="card-tag">pow</span>
+        </div>
+        <div class="card-preview">Find the root between two known perfect squares, then interpolate.</div>
+        <div class="card-body">
+          <div class="trick-steps">
+            <div class="trick-step"><div class="step-num">1</div><div class="step-text">Find the two <em>perfect squares</em> that bracket the number.</div></div>
+            <div class="trick-step"><div class="step-num">2</div><div class="step-text">Linear interpolate: root ≈ lower + (n − lower²) / (upper² − lower²).</div></div>
+          </div>
+          <div class="example">
+            <div class="label">Example — √50</div>
+            7² = 49, 8² = 64<br>
+            50 − 49 = 1, range = 15<br>
+            √50 ≈ 7 + 1/15 ≈ <strong>7.07</strong>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── QUICK REFERENCE ── -->
+  <div>
+    <div class="section-label">Quick Reference</div>
+    <div class="wide-card">
+      <div class="section-label">Multiplication Table 1–12 (rows × columns)</div>
+      <div style="overflow-x:auto">
+        <table class="ref-table" id="multTable" style="min-width:520px">
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Build multiplication table
+(function() {
+  const t = document.getElementById('multTable');
+  let html = '<tr><th>×</th>';
+  for (let c = 1; c <= 12; c++) html += `<th>${c}</th>`;
+  html += '</tr>';
+  for (let r = 1; r <= 12; r++) {
+    html += `<tr><td>${r}</td>`;
+    for (let c = 1; c <= 12; c++) {
+      const v = r * c;
+      const hi = (v % 10 === 0 || v === r*r) ? ' style="color:var(--gold);font-weight:700"' : '';
+      html += `<td${hi}>${v}</td>`;
+    }
+    html += '</tr>';
+  }
+  t.innerHTML = html;
+})();
+
+// Toggle card open/close
+function toggleCard(card) {
+  card.classList.toggle('open');
+}
+
+// Filter by category
+let activeFilter = 'all';
+function setFilter(tag, btn) {
+  activeFilter = tag;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function filterCards() {
+  applyFilters();
+}
+
+function applyFilters() {
+  const query = document.getElementById('searchInput').value.toLowerCase().trim();
+  document.querySelectorAll('.card').forEach(card => {
+    const tags = card.dataset.tags || '';
+    const text = card.innerText.toLowerCase();
+    const matchTag = activeFilter === 'all' || tags.includes(activeFilter);
+    const matchSearch = !query || text.includes(query);
+    card.classList.toggle('hidden', !(matchTag && matchSearch));
+  });
+}
+</script>
+
+</body>
+</html>
