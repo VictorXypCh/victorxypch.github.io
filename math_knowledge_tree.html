@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>STEM Math Tree</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #050810;
+  --surface: #0c1120;
+  --card: #111827;
+  --border: #1e293b;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --faint: #1e293b;
+
+  --stem: #06b6d4;
+  --cs:   #8b5cf6;
+  --ai:   #f59e0b;
+  --math: #10b981;
+
+  --locked: #1e293b;
+  --done: #10b981;
+  --active: #06b6d4;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── TOP NAV ── */
+.topnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 56px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+  gap: 12px;
+  z-index: 100;
+}
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, var(--stem), var(--cs));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nav-filters {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.nav-filters::-webkit-scrollbar{display:none;}
+.filter-btn {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.filter-btn.active { color: var(--text); }
+.filter-btn[data-f="all"].active { border-color: var(--text); background: var(--border); }
+.filter-btn[data-f="stem"].active { border-color: var(--stem); background: #06b6d410; color: var(--stem); }
+.filter-btn[data-f="cs"].active { border-color: var(--cs); background: #8b5cf610; color: var(--cs); }
+.filter-btn[data-f="ai"].active { border-color: var(--ai); background: #f59e0b10; color: var(--ai); }
+.nav-xp {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--ai);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── LAYOUT ── */
+.layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── TREE PANEL ── */
+.tree-panel {
+  width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 24px 16px 60px;
+  scroll-behavior: smooth;
+}
+.tree-panel::-webkit-scrollbar{width:4px;}
+.tree-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* ── LESSON PANEL ── */
+.lesson-panel {
+  width: 0;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+  display: flex;
+  flex-direction: column;
+}
+.lesson-panel.open {
+  width: min(440px, 100vw);
+}
+@media (max-width: 700px) {
+  .lesson-panel.open {
+    position: fixed;
+    inset: 56px 0 0 0;
+    width: 100vw;
+    z-index: 200;
+  }
+}
+.lesson-inner {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+.lesson-inner::-webkit-scrollbar{width:3px;}
+.lesson-inner::-webkit-scrollbar-thumb{background:var(--border);}
+
+/* ── CHAPTER LABELS ── */
+.chapter-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: var(--muted);
+  text-align: center;
+  margin: 28px 0 16px;
+  position: relative;
+}
+.chapter-label::before,.chapter-label::after {
+  content:'';
+  position:absolute;
+  top:50%;
+  width:22%;
+  height:1px;
+  background: var(--border);
+}
+.chapter-label::before{left:0;}
+.chapter-label::after{right:0;}
+
+/* ── NODE ROW ── */
+.node-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 0;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+/* ── CONNECTOR LINE ── */
+.connector {
+  width: 2px;
+  background: var(--border);
+  margin: 0 auto;
+  transition: background 0.3s;
+}
+.connector.lit { background: linear-gradient(to bottom, var(--c, var(--stem)), var(--border)); }
+
+/* ── NODE ── */
+.node {
+  width: 100%;
+  max-width: 340px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.22s;
+  position: relative;
+  overflow: hidden;
+}
+.node::before {
+  content:'';
+  position:absolute;
+  left:0;top:0;bottom:0;
+  width:3px;
+  background: var(--c, var(--stem));
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.node:hover { border-color: color-mix(in srgb, var(--c, var(--stem)) 50%, transparent); transform: translateX(3px); }
+.node:hover::before { opacity: 1; }
+.node.active { border-color: var(--c, var(--stem)); background: color-mix(in srgb, var(--c, var(--stem)) 8%, var(--card)); }
+.node.active::before { opacity: 1; }
+.node.locked { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.6); }
+.node.locked:hover { transform: none; border-color: var(--border); }
+.node.locked:hover::before { opacity: 0; }
+.node.done { border-color: #10b98130; }
+.node.done::before { background: var(--done); opacity: 0.6; }
+
+.node-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.node-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  background: color-mix(in srgb, var(--c, var(--stem)) 15%, transparent);
+  flex-shrink: 0;
+}
+.node-badges {
+  display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end;
+}
+.badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  border: 1px solid;
+}
+.badge-stem { color: var(--stem); border-color: #06b6d430; background: #06b6d408; }
+.badge-cs   { color: var(--cs);   border-color: #8b5cf630; background: #8b5cf608; }
+.badge-ai   { color: var(--ai);   border-color: #f59e0b30; background: #f59e0b08; }
+
+.node-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 3px;
+  color: var(--text);
+}
+.node-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.node-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--faint);
+}
+.node-xp {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ai);
+}
+.node-status {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.status-locked { color: var(--muted); }
+.status-ready  { color: var(--active); }
+.status-done   { color: var(--done); }
+
+/* ── LESSON PANEL CONTENT ── */
+.lesson-close {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px 0;
+  flex-shrink: 0;
+}
+.lc-back {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 16px;
+  cursor: pointer;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.lc-back:hover { color: var(--text); border-color: var(--muted); }
+.lc-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.l-hero {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--lc) 20%, var(--card)), var(--card));
+  border: 1px solid color-mix(in srgb, var(--lc) 25%, transparent);
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+.l-hero-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+.l-hero-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 1px; margin-bottom: 6px; }
+.l-hero-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+.l-section { margin-bottom: 20px; }
+.l-section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.concept-block {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 8px;
+}
+.concept-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px;
+}
+.concept-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--lc, var(--stem));
+  background: color-mix(in srgb, var(--lc, var(--stem)) 12%, transparent);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.concept-name { font-size: 13px; font-weight: 600; }
+.concept-body { font-size: 13px; color: var(--muted); line-height: 1.7; }
+.concept-body strong { color: var(--text); }
+.concept-body code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: var(--border);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--lc, var(--stem));
+}
+
+.formula-box {
+  background: #0a0f1a;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--lc, var(--stem));
+  border-radius: 0 8px 8px 0;
+  padding: 12px 16px;
+  margin: 10px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.8;
+}
+.formula-box .flabel {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.trick-pill {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  background: color-mix(in srgb, var(--ai) 8%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--ai) 20%, transparent);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-top: 8px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.trick-pill strong { color: var(--ai); }
+.trick-emoji { flex-shrink: 0; font-size: 14px; }
+
+/* ── QUIZ ── */
+.quiz-section { margin-top: 4px; }
+.quiz-q {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 8px;
+}
+.quiz-q-text { font-size: 14px; font-weight: 500; margin-bottom: 12px; line-height: 1.5; }
+.quiz-options { display: flex; flex-direction: column; gap: 6px; }
+.quiz-opt {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+  color: var(--text);
+}
+.quiz-opt:hover:not([disabled]) { border-color: var(--lc, var(--stem)); background: color-mix(in srgb, var(--lc, var(--stem)) 8%, var(--surface)); }
+.quiz-opt.correct { border-color: var(--done); background: #10b98115; color: #6ee7b7; }
+.quiz-opt.wrong   { border-color: #ef444440; background: #ef444410; color: #fca5a5; }
+.quiz-opt.reveal  { border-color: var(--done); color: #6ee7b7; }
+
+.quiz-result {
+  display: none;
+  text-align: center;
+  padding: 18px;
+  border-radius: 10px;
+  margin-top: 8px;
+}
+.quiz-result.show { display: block; }
+.quiz-result.pass { background: #10b98112; border: 1px solid #10b98130; }
+.quiz-result.fail { background: #ef444412; border: 1px solid #ef444430; }
+.quiz-result-icon { font-size: 36px; margin-bottom: 8px; display: block; }
+.quiz-result-text { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.quiz-result-sub  { font-size: 12px; color: var(--muted); }
+
+.complete-btn {
+  width: 100%;
+  background: var(--lc, var(--stem));
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 14px;
+  transition: all 0.2s;
+  display: none;
+}
+.complete-btn.show { display: block; }
+.complete-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+/* ── PROGRESS BAR ── */
+.progress-bar-wrap {
+  height: 3px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--stem), var(--cs));
+  transition: width 0.6s ease;
+}
+
+/* ── XP TOAST ── */
+.xp-toast {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: var(--ai);
+  color: #000;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 100px;
+  opacity: 0;
+  transition: all 0.3s;
+  pointer-events: none;
+  z-index: 999;
+  white-space: nowrap;
+}
+.xp-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; color: var(--muted); text-align: center; padding: 40px;
+  font-size: 14px; gap: 12px;
+}
+.empty-state .big { font-size: 48px; }
+</style>
+</head>
+<body>
+
+<div class="xp-toast" id="xp-toast"></div>
+
+<!-- TOP NAV -->
+<div class="topnav">
+  <div class="nav-logo">MATH TREE</div>
+  <div class="nav-filters">
+    <button class="filter-btn active" data-f="all" onclick="setFilter('all',this)">ALL</button>
+    <button class="filter-btn" data-f="stem" onclick="setFilter('stem',this)">STEM</button>
+    <button class="filter-btn" data-f="cs" onclick="setFilter('cs',this)">CS</button>
+    <button class="filter-btn" data-f="ai" onclick="setFilter('ai',this)">AI/ML</button>
+  </div>
+  <div class="nav-xp">⚡ <span id="xp-count">0</span> XP</div>
+</div>
+<div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog-bar" style="width:0%"></div></div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- TREE -->
+  <div class="tree-panel" id="tree-panel">
+    <!-- built by JS -->
+  </div>
+
+  <!-- LESSON -->
+  <div class="lesson-panel" id="lesson-panel">
+    <div class="lesson-close">
+      <button class="lc-back" onclick="closeLesson()">←</button>
+      <div class="lc-title" id="lc-title">Select a topic</div>
+    </div>
+    <div class="lesson-inner" id="lesson-inner">
+      <div class="empty-state">
+        <span class="big">🌳</span>
+        <strong>Pick a node</strong>
+        <span>Tap any topic in the tree to start learning</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  CURRICULUM DATA
+// ══════════════════════════════════════════
+const TREE = [
+  {
+    chapter: 'FOUNDATION',
+    nodes: [
+      {
+        id:'numbers', icon:'🔢', title:'Number Systems', color:'var(--math)',
+        fields:['stem','cs','ai'], xp:50, requires:[],
+        desc:'Integers, rationals, reals — the language of everything.',
+        concepts:[
+          { name:'Natural & Integers', body:'Natural numbers ℕ = {0,1,2,3…}. Integers ℤ include negatives. Every counting problem starts here. <strong>Key property:</strong> integers are closed under addition, subtraction, and multiplication.' },
+          { name:'Rational Numbers ℚ', body:'Any number expressible as <strong>p/q</strong> where p,q are integers and q≠0. Decimals either terminate (1/4=0.25) or repeat (1/3=0.333…). Density property: between any two rationals, another exists.' },
+          { name:'Irrational & Real Numbers', body:'Numbers like <code>√2</code>, <code>π</code>, <code>e</code> cannot be expressed as fractions. Real numbers ℝ = rationals ∪ irrationals. They fill the "number line" completely.' },
+          { name:'Number Bases', body:'Decimal (base 10) is human convention. <strong>Binary (base 2)</strong> is how computers think: 1011₂ = 8+2+1 = 11₁₀. Hexadecimal (base 16) compresses binary: 0xFF = 255.' },
+        ],
+        formulas:['Binary: 1101₂ = 1×2³ + 1×2² + 0×2¹ + 1×2⁰ = 13', 'Hex: A=10, B=11, …, F=15'],
+        trick:'For base conversion, divide repeatedly by the base and read remainders bottom-up.',
+        quiz:[
+          { q:'What is 1010₂ in decimal?', opts:['8','10','12','6'], ans:1 },
+          { q:'Which is irrational?', opts:['0.5','22/7','√2','1.333…'], ans:2 },
+          { q:'ℤ includes:', opts:['only positives','positives & zero','positives, negatives & zero','only naturals'], ans:2 },
+        ]
+      },
+      {
+        id:'algebra_basics', icon:'📐', title:'Algebra Fundamentals', color:'var(--math)',
+        fields:['stem','cs','ai'], xp:60, requires:['numbers'],
+        desc:'Variables, equations, and the art of manipulation.',
+        concepts:[
+          { name:'Variables & Expressions', body:'A variable (x, y, n) is a placeholder for a number. An expression like <code>3x + 2</code> has no equals sign. An <strong>equation</strong> (3x+2=8) makes a claim that can be true or false.' },
+          { name:'Solving Linear Equations', body:'Goal: isolate the variable. Use inverse operations. <strong>Balance rule:</strong> whatever you do to one side, do to the other. Example: 2x+5=13 → 2x=8 → x=4.' },
+          { name:'Factoring', body:'Rewriting expressions as products. <code>x²+5x+6 = (x+2)(x+3)</code>. Key patterns: <strong>difference of squares</strong> a²−b²=(a+b)(a−b), <strong>perfect square</strong> (a+b)²=a²+2ab+b².' },
+          { name:'Functions', body:'A function f(x) maps each input to exactly one output. Think of it as a machine: input x, output f(x). <strong>Domain</strong> = valid inputs, <strong>Range</strong> = possible outputs.' },
+        ],
+        formulas:['Quadratic: x = (−b ± √(b²−4ac)) / 2a','(a+b)² = a² + 2ab + b²','a²−b² = (a+b)(a−b)'],
+        trick:'FOIL for (a+b)(c+d): First, Outer, Inner, Last. Then combine like terms.',
+        quiz:[
+          { q:'Solve: 3x − 4 = 11', opts:['x=3','x=5','x=7','x=4'], ans:1 },
+          { q:'Factor: x²−9', opts:['(x−3)²','(x+3)(x−3)','(x−9)(x+1)','(x+9)(x−1)'], ans:1 },
+          { q:'f(x)=2x+1. What is f(3)?', opts:['5','6','7','8'], ans:2 },
+        ]
+      },
+    ]
+  },
+  {
+    chapter: 'PRE-CALCULUS',
+    nodes: [
+      {
+        id:'trig', icon:'📡', title:'Trigonometry', color:'var(--stem)',
+        fields:['stem'], xp:70, requires:['algebra_basics'],
+        desc:'Angles, waves, and periodic phenomena.',
+        concepts:[
+          { name:'Right Triangle Trig', body:'For a right triangle: <strong>sin θ = opposite/hypotenuse</strong>, cos θ = adjacent/hypotenuse, tan θ = opposite/adjacent. Mnemonic: <code>SOH-CAH-TOA</code>.' },
+          { name:'Unit Circle', body:'A circle of radius 1 centred at the origin. Point (cos θ, sin θ) for angle θ. Key values: sin(0)=0, sin(π/2)=1, sin(π)=0. The unit circle unifies geometry with analysis.' },
+          { name:'Trig Identities', body:'Fundamental: <code>sin²θ + cos²θ = 1</code>. This comes directly from Pythagoras on the unit circle. From it: 1+tan²θ=sec²θ and 1+cot²θ=csc²θ.' },
+          { name:'Waves & Periodicity', body:'y = A·sin(Bx + C) + D. <strong>A</strong>=amplitude, <strong>2π/B</strong>=period, <strong>C/B</strong>=phase shift, <strong>D</strong>=vertical shift. All oscillations in physics and signals follow this form.' },
+        ],
+        formulas:['sin²θ + cos²θ = 1','sin(A±B) = sinA·cosB ± cosA·sinB','cos(2θ) = cos²θ − sin²θ'],
+        trick:'Remember the unit circle: the coordinates (cos θ, sin θ). At 30°,45°,60° think: √3/2, √2/2, 1/2 for cos, reversed for sin.',
+        quiz:[
+          { q:'sin(90°) = ?', opts:['0','0.5','1','√2/2'], ans:2 },
+          { q:'sin²θ + cos²θ = ?', opts:['0','2','1','depends on θ'], ans:2 },
+          { q:'Period of y=sin(2x) is:', opts:['2π','π','4π','π/2'], ans:1 },
+        ]
+      },
+      {
+        id:'logic', icon:'⚙️', title:'Logic & Proof', color:'var(--cs)',
+        fields:['cs','ai'], xp:65, requires:['algebra_basics'],
+        desc:'Propositional logic, truth tables, and mathematical reasoning.',
+        concepts:[
+          { name:'Propositions & Connectives', body:'A proposition is a statement that is true or false. Connectives: <strong>AND (∧)</strong>, <strong>OR (∨)</strong>, <strong>NOT (¬)</strong>, <strong>IMPLIES (→)</strong>. These are the building blocks of all software logic.' },
+          { name:'Truth Tables', body:'Enumerate all combinations of T/F for variables. For p→q: true unless p=T and q=F. This mirrors <code>if/else</code> logic in code. NOT (p→q) means "p is true but q fails."' },
+          { name:'Proof Techniques', body:'<strong>Direct proof:</strong> assume hypothesis, derive conclusion. <strong>Contradiction:</strong> assume ¬conclusion leads to impossibility. <strong>Induction:</strong> prove base case, then n→n+1.' },
+          { name:'Sets', body:'A set is an unordered collection with no duplicates. Operations: <strong>Union A∪B</strong> (in A or B), <strong>Intersection A∩B</strong> (in both), <strong>Complement Aᶜ</strong> (not in A). Power set: all subsets of A.' },
+        ],
+        formulas:['De Morgan: ¬(A∧B) = ¬A∨¬B','De Morgan: ¬(A∨B) = ¬A∧¬B','|A∪B| = |A| + |B| − |A∩B|'],
+        trick:'De Morgan\'s laws are the most-used in programming: NOT (A AND B) === !A OR !B.',
+        quiz:[
+          { q:'p=T, q=F. p→q is:', opts:['True','False','Undefined','Both'], ans:1 },
+          { q:'¬(A∨B) equals:', opts:['¬A∧¬B','¬A∨¬B','A∧B','A∨B'], ans:0 },
+          { q:'Power set of {a,b} has how many elements?', opts:['2','3','4','5'], ans:2 },
+        ]
+      },
+    ]
+  },
+  {
+    chapter: 'CALCULUS',
+    nodes: [
+      {
+        id:'limits', icon:'→', title:'Limits & Continuity', color:'var(--stem)',
+        fields:['stem','ai'], xp:80, requires:['trig','algebra_basics'],
+        desc:'The foundation of calculus — what happens as x approaches a value.',
+        concepts:[
+          { name:'Intuition of a Limit', body:'lim(x→a) f(x) = L means f(x) gets arbitrarily close to L as x approaches a, <strong>without necessarily reaching a</strong>. Like asking "where is this function heading?"' },
+          { name:'Limit Laws', body:'If lim f(x)=L and lim g(x)=M, then: lim[f+g]=L+M, lim[f·g]=L·M, lim[f/g]=L/M (M≠0). These let you break complex limits into parts.' },
+          { name:'Continuity', body:'f is continuous at a if: (1) f(a) exists, (2) lim f(x) exists, (3) they are equal. Discontinuities: <strong>jump</strong>, <strong>removable</strong> (hole), <strong>infinite</strong> (asymptote).' },
+          { name:'L\'Hôpital\'s Rule', body:'For 0/0 or ∞/∞ indeterminate forms: <code>lim f/g = lim f\'/g\'</code>. Example: lim(sin x/x) as x→0 = lim(cos x/1) = 1. Essential for ML convergence analysis.' },
+        ],
+        formulas:["lim(x→0) sin(x)/x = 1","lim(x→∞) (1 + 1/n)ⁿ = e","L'Hôpital: lim f/g = lim f'/g' (0/0 form)"],
+        trick:'Continuity check: if you can draw the function without lifting your pen at that point, it\'s continuous there.',
+        quiz:[
+          { q:'lim(x→2) (x²−4)/(x−2) = ?', opts:['0','2','4','∞'], ans:2 },
+          { q:'lim(x→0) sin(x)/x = ?', opts:['0','∞','undefined','1'], ans:3 },
+          { q:'f is continuous at x=a means:', opts:['f(a) exists only','lim exists only','both exist and are equal','f(a)=0'], ans:2 },
+        ]
+      },
+      {
+        id:'derivatives', icon:'d/dx', title:'Derivatives', color:'var(--stem)',
+        fields:['stem','ai'], xp:90, requires:['limits'],
+        desc:'Instantaneous rate of change — the engine of optimization.',
+        concepts:[
+          { name:'Definition', body:'f\'(x) = lim(h→0) [f(x+h)−f(x)]/h. Geometrically: the slope of the tangent line. Physically: instantaneous velocity. In ML: <strong>gradient</strong> that drives gradient descent.' },
+          { name:'Differentiation Rules', body:'<strong>Power rule:</strong> d/dx[xⁿ] = nxⁿ⁻¹. <strong>Product rule:</strong> (fg)\'=f\'g+fg\'. <strong>Chain rule:</strong> d/dx[f(g(x))]=f\'(g(x))·g\'(x). Chain rule is the most used in neural network backprop.' },
+          { name:'Common Derivatives', body:'d/dx[sin x]=cos x, d/dx[eˣ]=eˣ (remarkable!), d/dx[ln x]=1/x, d/dx[xⁿ]=nxⁿ⁻¹. The fact that eˣ is its own derivative makes it appear everywhere in growth/decay.' },
+          { name:'Applications', body:'<strong>Critical points:</strong> f\'(x)=0 → potential max/min. <strong>Second derivative test:</strong> f\'\'(x)>0 → local min, f\'\'(x)<0 → local max. In ML: minimizing loss = finding where gradient = 0.' },
+        ],
+        formulas:["Power: d/dx[xⁿ] = nxⁿ⁻¹","Chain: d/dx[f(g(x))] = f'(g(x))·g'(x)","d/dx[eˣ] = eˣ    d/dx[ln x] = 1/x"],
+        trick:'Chain rule: "derivative of outside (keeping inside), times derivative of inside." For neural nets: this is backpropagation.',
+        quiz:[
+          { q:'d/dx[x³] = ?', opts:['x²','3x²','3x','x³'], ans:1 },
+          { q:'d/dx[e^(2x)] = ?', opts:['e^(2x)','2e^(2x)','2xe^x','e^x'], ans:1 },
+          { q:'If f\'(a)=0 and f\'\'(a)>0, then x=a is:', opts:['local max','inflection','local min','saddle'], ans:2 },
+        ]
+      },
+      {
+        id:'integrals', icon:'∫', title:'Integration', color:'var(--stem)',
+        fields:['stem','ai'], xp:90, requires:['derivatives'],
+        desc:'Accumulation, area under curves, and probability distributions.',
+        concepts:[
+          { name:'Antiderivatives', body:'The antiderivative F(x) of f(x) satisfies F\'(x)=f(x). Write ∫f(x)dx = F(x)+C. The <strong>+C</strong> matters: indefinite integrals have a family of solutions.' },
+          { name:'Fundamental Theorem', body:'Part 1: d/dx[∫ₐˣ f(t)dt] = f(x). Part 2: ∫ₐᵇ f(x)dx = F(b)−F(a). This connects differentiation and integration — <strong>the deepest theorem in calculus</strong>.' },
+          { name:'Techniques', body:'<strong>u-substitution:</strong> ∫f(g(x))g\'(x)dx = ∫f(u)du. <strong>Integration by parts:</strong> ∫u dv = uv − ∫v du. IBP follows from reversing the product rule.' },
+          { name:'Applications in AI/ML', body:'Probability: P(a≤X≤b) = ∫ₐᵇ f(x)dx where f is a PDF. Expected value: E[X] = ∫x·f(x)dx. Continuous distributions (Normal, Exponential) are all defined via integrals.' },
+        ],
+        formulas:['∫xⁿ dx = xⁿ⁺¹/(n+1) + C  (n≠−1)','∫eˣ dx = eˣ + C','∫(1/x) dx = ln|x| + C','FTC: ∫ₐᵇ f(x)dx = F(b)−F(a)'],
+        trick:'u-substitution is the integral version of the chain rule. Spot the "inner function" and let u = that.',
+        quiz:[
+          { q:'∫x² dx = ?', opts:['2x','x³/3 + C','x³ + C','3x²'], ans:1 },
+          { q:'∫eˣ dx = ?', opts:['xeˣ + C','eˣ + C','eˣ⁺¹ + C','1/eˣ + C'], ans:1 },
+          { q:'∫₀¹ x dx = ?', opts:['0','1','0.5','2'], ans:2 },
+        ]
+      },
+    ]
+  },
+  {
+    chapter: 'LINEAR ALGEBRA',
+    nodes: [
+      {
+        id:'vectors', icon:'→', title:'Vectors & Spaces', color:'var(--cs)',
+        fields:['stem','cs','ai'], xp:85, requires:['algebra_basics'],
+        desc:'Arrows with magnitude and direction — the atoms of linear algebra.',
+        concepts:[
+          { name:'Vectors', body:'A vector is an ordered list of numbers: <code>v = [v₁, v₂, …, vₙ]</code>. It represents a point in n-dimensional space, or a direction+magnitude. In ML, <strong>every data point is a vector</strong>.' },
+          { name:'Dot Product', body:'u·v = u₁v₁ + u₂v₂ + … = |u||v|cosθ. If u·v=0, vectors are <strong>orthogonal</strong> (perpendicular). The dot product is the workhorse of neural network layers: Wx + b.' },
+          { name:'Vector Spaces', body:'A set V with addition and scalar multiplication satisfying 8 axioms. Key examples: ℝⁿ, polynomials, functions. A <strong>subspace</strong> must contain 0 and be closed under addition and scaling.' },
+          { name:'Basis & Dimension', body:'A basis is a minimal spanning set — linearly independent vectors that reach every point. The number of basis vectors = <strong>dimension</strong>. ℝ³ has dimension 3. Standard basis of ℝ²: {[1,0],[0,1]}.' },
+        ],
+        formulas:['u·v = Σᵢ uᵢvᵢ = |u||v|cosθ','||v|| = √(v₁² + v₂² + … + vₙ²)','cosθ = (u·v)/(||u|| ||v||)'],
+        trick:'Cosine similarity (u·v / |u||v|) measures how "aligned" two vectors are — used in NLP embeddings.',
+        quiz:[
+          { q:'[1,2]·[3,4] = ?', opts:['7','10','11','5'], ans:2 },
+          { q:'If u·v=0, the vectors are:', opts:['parallel','equal','orthogonal','antiparallel'], ans:2 },
+          { q:'Dimension of ℝ⁴ is:', opts:['2','3','4','∞'], ans:2 },
+        ]
+      },
+      {
+        id:'matrices', icon:'▦', title:'Matrices & Transforms', color:'var(--cs)',
+        fields:['stem','cs','ai'], xp:90, requires:['vectors'],
+        desc:'Rectangular arrays that encode linear transformations.',
+        concepts:[
+          { name:'Matrix Operations', body:'Addition: element-wise. Scalar mult: scale every element. <strong>Matrix multiplication</strong>: (AB)ᵢⱼ = row i of A · column j of B. Note: AB ≠ BA in general. Shape rule: (m×n)(n×p) = (m×p).' },
+          { name:'Determinant', body:'A scalar encoding how much a matrix scales area/volume. For 2×2: det[[a,b],[c,d]] = ad−bc. If det=0, matrix is <strong>singular</strong> (no inverse). det=−1 means reflection.' },
+          { name:'Inverse & Systems', body:'A⁻¹ exists iff det(A)≠0. System Ax=b solved by x=A⁻¹b. But in practice, use Gaussian elimination (LU decomposition) — far more numerically stable. This is how linear regression is solved.' },
+          { name:'Rank & Null Space', body:'Rank = number of linearly independent rows/columns = dimension of column space. Null space: all x where Ax=0. <strong>Rank-Nullity theorem:</strong> rank(A) + nullity(A) = n (number of columns).' },
+        ],
+        formulas:['(AB)ᵢⱼ = Σₖ Aᵢₖ Bₖⱼ','det[[a,b],[c,d]] = ad − bc','A⁻¹ = (1/det(A)) · adj(A)'],
+        trick:'Matrix multiplication: think of it as each output row being a dot product of an input row with each column.',
+        quiz:[
+          { q:'Shape of (3×4)×(4×2) result?', opts:['3×2','4×4','2×3','3×4'], ans:0 },
+          { q:'det[[2,1],[1,2]] = ?', opts:['3','4','5','2'], ans:0 },
+          { q:'If det(A)=0, then A is:', opts:['invertible','singular','symmetric','orthogonal'], ans:1 },
+        ]
+      },
+      {
+        id:'eigenvalues', icon:'λ', title:'Eigenvalues & SVD', color:'var(--ai)',
+        fields:['cs','ai'], xp:100, requires:['matrices'],
+        desc:'The skeleton of a matrix — PCA, spectral methods, and deep learning.',
+        concepts:[
+          { name:'Eigenvalues/Eigenvectors', body:'Av = λv means: applying A to v only scales it (by λ), doesn\'t rotate. λ=eigenvalue, v=eigenvector. Found by: det(A−λI)=0 (characteristic polynomial).' },
+          { name:'Diagonalization', body:'If A has n independent eigenvectors: A = PDP⁻¹, where D is diagonal (eigenvalues on diagonal), P has eigenvectors as columns. Powers become easy: Aⁿ = PDⁿP⁻¹.' },
+          { name:'PCA Connection', body:'Principal Component Analysis finds directions of maximum variance. These are <strong>eigenvectors of the covariance matrix</strong>. Top eigenvalues = most important directions. Used everywhere in ML for dimensionality reduction.' },
+          { name:'SVD', body:'Any matrix A = UΣVᵀ. U, V are orthogonal matrices (rotations), Σ is diagonal (singular values). The most powerful matrix factorization. Used in: recommender systems, image compression, NLP (LSA).' },
+        ],
+        formulas:['Characteristic eq: det(A − λI) = 0','Diagonalization: A = P D P⁻¹','SVD: A = U Σ Vᵀ'],
+        trick:'SVD is like "eigenvalues for non-square matrices." Singular values (σᵢ) measure how much the matrix stretches each direction.',
+        quiz:[
+          { q:'Av=λv means v is an:', opts:['eigenvector','basis vector','null vector','unit vector'], ans:0 },
+          { q:'PCA uses eigenvectors of:', opts:['identity matrix','covariance matrix','zero matrix','inverse'], ans:1 },
+          { q:'SVD decomposes A into:', opts:['A=LU','A=QR','A=UΣVᵀ','A=PDP⁻¹'], ans:2 },
+        ]
+      },
+    ]
+  },
+  {
+    chapter: 'PROBABILITY & STATISTICS',
+    nodes: [
+      {
+        id:'probability', icon:'🎲', title:'Probability Theory', color:'var(--ai)',
+        fields:['stem','cs','ai'], xp:80, requires:['algebra_basics'],
+        desc:'Quantifying uncertainty — the mathematical foundation of AI.',
+        concepts:[
+          { name:'Probability Axioms', body:'P(A) ∈ [0,1], P(Ω)=1, P(A∪B)=P(A)+P(B) if A∩B=∅ (Kolmogorov). Every probability calculation follows these three axioms. Addition rule for non-mutually-exclusive: P(A∪B)=P(A)+P(B)−P(A∩B).' },
+          { name:'Conditional Probability', body:'P(A|B) = P(A∩B)/P(B) — probability of A given B already occurred. Fundamental for: Bayesian inference, Naive Bayes classifier, Hidden Markov Models, and understanding causal reasoning.' },
+          { name:'Bayes\' Theorem', body:'P(A|B) = P(B|A)·P(A) / P(B). The foundation of Bayesian ML. P(A) = <strong>prior</strong>, P(A|B) = <strong>posterior</strong>, P(B|A) = <strong>likelihood</strong>. Update your belief when you see new data.' },
+          { name:'Independence', body:'A and B are independent if P(A∩B)=P(A)·P(B). Equivalently, P(A|B)=P(A). Neural networks assume (approximately) independence within mini-batches for gradient descent to work.' },
+        ],
+        formulas:["Bayes: P(A|B) = P(B|A)·P(A) / P(B)",'P(A∪B) = P(A) + P(B) − P(A∩B)',"Total prob: P(B) = Σᵢ P(B|Aᵢ)·P(Aᵢ)"],
+        trick:'Bayes in English: posterior = (likelihood × prior) / evidence. Always update your prior with new data.',
+        quiz:[
+          { q:'P(A|B) is called:', opts:['marginal probability','joint probability','conditional probability','prior'], ans:2 },
+          { q:'P(A∩B) = P(A)P(B) implies:', opts:['A⊂B','A=B','A and B independent','P(A)=P(B)'], ans:2 },
+          { q:'Bayes theorem is used to update:', opts:['likelihood','prior to posterior','variance','expectations'], ans:1 },
+        ]
+      },
+      {
+        id:'distributions', icon:'📊', title:'Distributions & Stats', color:'var(--ai)',
+        fields:['stem','cs','ai'], xp:85, requires:['probability','integrals'],
+        desc:'Gaussian, Bernoulli, Poisson — the families of randomness.',
+        concepts:[
+          { name:'Discrete Distributions', body:'<strong>Bernoulli:</strong> single coin flip, P(X=1)=p. <strong>Binomial:</strong> n flips, P(X=k)=C(n,k)pᵏ(1−p)ⁿ⁻ᵏ. <strong>Poisson:</strong> counts per interval, P(X=k)=e⁻ᵏλᵏ/k!. Used in classification outputs.' },
+          { name:'Normal Distribution', body:'N(μ,σ²): bell curve. PDF = (1/σ√2π)e^(−(x−μ)²/2σ²). Central Limit Theorem: sum of many independent RVs → Normal, regardless of their distribution. <strong>This is why Normal is everywhere.</strong>' },
+          { name:'Expectation & Variance', body:'E[X] = ∫x·f(x)dx (continuous) or Σx·P(x) (discrete). Var(X) = E[(X−μ)²] = E[X²]−(E[X])². Var measures spread. Standard deviation σ = √Var(X).' },
+          { name:'MLE', body:'Maximum Likelihood Estimation: find parameters θ that maximize P(data|θ). Equivalent to minimizing negative log-likelihood (NLL). <strong>Training a neural network = MLE with SGD.</strong>' },
+        ],
+        formulas:['Normal: f(x) = (1/σ√2π) e^(−(x−μ)²/2σ²)','E[X] = Σ x·P(X=x)','Var(X) = E[X²] − (E[X])²'],
+        trick:'Log-likelihood trick: log turns products into sums. Easier to differentiate. Maximizing log-likelihood = maximizing likelihood.',
+        quiz:[
+          { q:'CLT says sums of many RVs converge to:', opts:['Uniform','Poisson','Normal','Bernoulli'], ans:2 },
+          { q:'Var(X) = E[X²] − ?', opts:['E[X]','(E[X])²','E[X]²/2','σ'], ans:1 },
+          { q:'MLE finds parameters that:', opts:['minimize variance','maximize P(data|θ)','minimize E[X]','maximize prior'], ans:1 },
+        ]
+      },
+    ]
+  },
+  {
+    chapter: 'DISCRETE MATH & CS',
+    nodes: [
+      {
+        id:'combinatorics', icon:'🧩', title:'Combinatorics', color:'var(--cs)',
+        fields:['cs','ai'], xp:75, requires:['logic'],
+        desc:'Counting without counting — permutations, combinations, and pigeonhole.',
+        concepts:[
+          { name:'Counting Principles', body:'<strong>Multiplication rule:</strong> if A can happen m ways and B can happen n ways, both together: m×n ways. <strong>Addition rule:</strong> if A and B are mutually exclusive, either happens in m+n ways.' },
+          { name:'Permutations & Combinations', body:'Permutations (order matters): P(n,r)=n!/(n−r)!. Combinations (order doesn\'t): C(n,r)=n!/(r!(n−r)!). Key insight: C(n,r) = P(n,r)/r! because we divide out the r! orderings that don\'t matter.' },
+          { name:'Pigeonhole Principle', body:'If n+1 objects go into n boxes, at least one box has ≥2 objects. Powerful for existence proofs. Example: In any group of 13 people, at least 2 share a birth month.' },
+          { name:'Inclusion-Exclusion', body:'|A∪B∪C| = |A|+|B|+|C| − |A∩B| − |A∩C| − |B∩C| + |A∩B∩C|. Generalizes to n sets. Used in probability, database query optimization, and complexity theory.' },
+        ],
+        formulas:['P(n,r) = n! / (n−r)!','C(n,r) = n! / (r!(n−r)!)','|A∪B| = |A| + |B| − |A∩B|'],
+        trick:'C(n,2) = n(n−1)/2 counts all pairs. Used constantly in graph theory (number of edges in complete graph).',
+        quiz:[
+          { q:'C(5,2) = ?', opts:['10','20','5','15'], ans:0 },
+          { q:'P(4,2) = ?', opts:['6','12','24','8'], ans:1 },
+          { q:'Pigeonhole: 13 people, min months shared =', opts:['1','2','3','13'], ans:0 },
+        ]
+      },
+      {
+        id:'graph_theory', icon:'🕸️', title:'Graph Theory', color:'var(--cs)',
+        fields:['cs','ai'], xp:80, requires:['combinatorics'],
+        desc:'Networks, trees, paths — the math of connectivity.',
+        concepts:[
+          { name:'Graphs', body:'G = (V, E) where V=vertices, E=edges. <strong>Undirected:</strong> edges have no direction. <strong>Directed (digraph):</strong> edges have direction. <strong>Weighted:</strong> edges have costs. Every network (social, neural, road) is a graph.' },
+          { name:'Trees', body:'A connected graph with no cycles. n vertices → n−1 edges. <strong>Binary trees</strong> in CS: each node has ≤2 children. Decision trees, parse trees, and heap structures are all trees.' },
+          { name:'Paths & Connectivity', body:'Path: sequence of vertices connected by edges. <strong>BFS</strong> (breadth-first): finds shortest path in unweighted graphs. <strong>DFS</strong> (depth-first): explores as far as possible. Both are O(V+E).' },
+          { name:'Graph Algorithms', body:'<strong>Dijkstra:</strong> shortest path with non-negative weights O((V+E)logV). <strong>Minimum spanning tree:</strong> Kruskal, Prim. In ML, graphs power Graph Neural Networks (GNNs), knowledge graphs, and molecule prediction.' },
+        ],
+        formulas:['Tree: |E| = |V| − 1','Handshaking: Σdeg(v) = 2|E|','Complete graph Kₙ: |E| = n(n−1)/2'],
+        trick:'Any tree on n nodes has exactly n-1 edges. If you know this, you can immediately check if a graph is a tree.',
+        quiz:[
+          { q:'A tree with 7 nodes has how many edges?', opts:['6','7','8','5'], ans:0 },
+          { q:'BFS is used for:', opts:['cycle detection','shortest path (unweighted)','topological sort','all of the above'], ans:1 },
+          { q:'Σdeg(v) over all vertices = ?', opts:['|V|','|E|','2|E|','|V|+|E|'], ans:2 },
+        ]
+      },
+      {
+        id:'complexity', icon:'⏱️', title:'Algorithms & Complexity', color:'var(--cs)',
+        fields:['cs'], xp:90, requires:['graph_theory'],
+        desc:'Big-O, P vs NP, and the science of efficiency.',
+        concepts:[
+          { name:'Big-O Notation', body:'O(f(n)) describes upper bound on growth rate. O(1) < O(log n) < O(n) < O(n log n) < O(n²) < O(2ⁿ). <strong>Dominant term rule:</strong> O(n²+3n+7) = O(n²). Constants and lower-order terms drop.' },
+          { name:'Common Complexities', body:'Binary search: O(log n). Merge sort: O(n log n). Bubble sort: O(n²). Matrix multiply: O(n³) naive, O(n^2.37) Strassen. Hash lookup: O(1) average. These determine what\'s feasible at scale.' },
+          { name:'Recurrence Relations', body:'T(n) = 2T(n/2) + O(n) is merge sort. Master Theorem solves T(n) = aT(n/b) + f(n). For merge sort: a=2, b=2, f(n)=n → T(n)=O(n log n).' },
+          { name:'P, NP, NP-complete', body:'P = problems solvable in polynomial time. NP = solutions verifiable in polynomial time. <strong>P ⊆ NP</strong> (certainly). NP-complete: hardest problems in NP (SAT, Travelling Salesman). P=NP? Unknown — $1M Millennium Prize.' },
+        ],
+        formulas:['Master: T(n)=aT(n/b)+f(n)','If f(n)=Θ(nˡᵒᵍᵇᵃ): T(n)=Θ(nˡᵒᵍᵇᵃ·log n)','Big-O: f(n)=O(g(n)) iff ∃c,n₀: f(n)≤c·g(n) ∀n≥n₀'],
+        trick:'When an algorithm halves the input each step, it\'s O(log n). When it loops n times with n work each, it\'s O(n²).',
+        quiz:[
+          { q:'O(n²+100n+5) simplifies to:', opts:['O(n)','O(n²)','O(100n)','O(n³)'], ans:1 },
+          { q:'Binary search is:', opts:['O(n)','O(n²)','O(log n)','O(1)'], ans:2 },
+          { q:'Merge sort time complexity:', opts:['O(n)','O(n log n)','O(n²)','O(log n)'], ans:1 },
+        ]
+      },
+    ]
+  },
+  {
+    chapter: 'AI & ML MATH',
+    nodes: [
+      {
+        id:'optimization', icon:'⛰️', title:'Optimization', color:'var(--ai)',
+        fields:['ai'], xp:95, requires:['derivatives','vectors'],
+        desc:'Gradient descent, convexity, and how neural networks learn.',
+        concepts:[
+          { name:'Gradient Descent', body:'Iteratively move in the direction of steepest descent: <code>θ ← θ − α∇L(θ)</code>. α=learning rate controls step size. Too large: diverges. Too small: slow convergence. The core algorithm behind all neural network training.' },
+          { name:'Convexity', body:'f is convex if the line segment between any two points lies above the graph. Convex functions have a unique global minimum. Loss surfaces of linear models are convex. Deep networks are <strong>non-convex</strong> — we use SGD and hope for a good local minimum.' },
+          { name:'SGD & Variants', body:'Stochastic GD: use one random sample per update — noisy but fast. Mini-batch: compromise. <strong>Adam:</strong> adaptive learning rates per parameter (momentum + RMSProp). Most used optimizer in deep learning today.' },
+          { name:'Lagrangians & Constraints', body:'Minimize f(x) subject to g(x)=0. Lagrangian: L(x,λ)=f(x)+λg(x). KKT conditions for inequality constraints. Used in SVMs, constrained policy optimization in RL.' },
+        ],
+        formulas:['GD: θ ← θ − α·∇L(θ)','Adam: m ← β₁m + (1−β₁)g,  v ← β₂v + (1−β₂)g²','Lagrangian: L(x,λ) = f(x) + λg(x)'],
+        trick:'Intuition for gradient: it points uphill. Gradient descent goes downhill to minimize loss. In 2D, it\'s just moving opposite to the slope.',
+        quiz:[
+          { q:'In GD, θ ← θ − α∇L, α is the:', opts:['momentum','learning rate','batch size','regularizer'], ans:1 },
+          { q:'A convex function has:', opts:['many local minima','no critical points','one global min','saddle points only'], ans:2 },
+          { q:'Adam optimizer combines:', opts:['SGD + L2','momentum + RMSProp','Adagrad + SGD','batch + stochastic'], ans:1 },
+        ]
+      },
+      {
+        id:'info_theory', icon:'ℹ️', title:'Information Theory', color:'var(--ai)',
+        fields:['cs','ai'], xp:95, requires:['probability','distributions'],
+        desc:'Entropy, KL divergence — the math of learning and compression.',
+        concepts:[
+          { name:'Shannon Entropy', body:'H(X) = −Σ p(x)log₂p(x). Measures average information/surprise in a distribution. High entropy = uniform (unpredictable). Low entropy = concentrated (predictable). Used as loss in classification: cross-entropy.' },
+          { name:'Cross-Entropy Loss', body:'H(p,q) = −Σ p(x)log q(x). Measures how well distribution q approximates true distribution p. <strong>Classification loss = cross-entropy between one-hot labels and softmax outputs.</strong> Minimizing it = MLE.' },
+          { name:'KL Divergence', body:'KL(p||q) = Σ p(x)log(p(x)/q(x)). Always ≥0 (Gibbs inequality). Not symmetric. Measures how much information is lost when using q to approximate p. Used in VAEs, RL (PPO), and Bayesian ML.' },
+          { name:'Mutual Information', body:'I(X;Y) = H(X) − H(X|Y). Measures shared information between X and Y. I(X;Y)=0 iff X,Y independent. Used in feature selection, representation learning, and the Information Bottleneck framework.' },
+        ],
+        formulas:['H(X) = −Σ p(x) log p(x)','Cross-entropy: H(p,q) = −Σ p(x) log q(x)','KL(p||q) = Σ p(x) log(p(x)/q(x)) ≥ 0'],
+        trick:'Cross-entropy loss = entropy + KL divergence. Minimizing CE loss is equivalent to minimizing KL divergence from predictions to true labels.',
+        quiz:[
+          { q:'Max entropy for a binary RV is when:', opts:['p=0','p=1','p=0.5','p=0.9'], ans:2 },
+          { q:'KL(p||q) = 0 means:', opts:['p and q independent','p=q','H(p)=0','q is uniform'], ans:1 },
+          { q:'Cross-entropy loss is used for:', opts:['regression','clustering','classification','PCA'], ans:2 },
+        ]
+      },
+      {
+        id:'multivariable', icon:'∂', title:'Multivariable Calculus', color:'var(--stem)',
+        fields:['stem','ai'], xp:100, requires:['integrals','vectors'],
+        desc:'Partial derivatives, Jacobians, Hessians — calculus in higher dimensions.',
+        concepts:[
+          { name:'Partial Derivatives', body:'∂f/∂x treats all other variables as constants. For f(x,y): ∂f/∂x measures rate of change in x-direction only. The <strong>gradient ∇f = [∂f/∂x, ∂f/∂y, …]</strong> points in the direction of steepest ascent.' },
+          { name:'Jacobian Matrix', body:'J = ∂(f₁,…,fₘ)/∂(x₁,…,xₙ) — the matrix of all partial derivatives for a vector-valued function. Shape: m×n. In neural networks, the Jacobian of the loss with respect to weights is computed during <strong>backpropagation</strong>.' },
+          { name:'Hessian Matrix', body:'H = [∂²f/∂xᵢ∂xⱼ] — second-order partial derivatives. Symmetric for smooth f (Schwarz theorem). At a critical point: H positive definite → local min, H negative definite → local max, indefinite → saddle.' },
+          { name:'Chain Rule (Vector)', body:'For composed functions: d/dt[f(g(t))] = ∇f(g(t))·g\'(t). In neural networks with L layers: ∂L/∂W₁ = (∂L/∂aL)·(∂aL/∂aL₋₁)·…·(∂a₂/∂W₁). This IS backpropagation.' },
+        ],
+        formulas:['Gradient: ∇f = [∂f/∂x₁, …, ∂f/∂xₙ]','Jacobian: Jᵢⱼ = ∂fᵢ/∂xⱼ','Hessian: Hᵢⱼ = ∂²f/∂xᵢ∂xⱼ'],
+        trick:'The gradient always points toward maximum increase. Gradient descent negates it to go downhill — minimizing loss.',
+        quiz:[
+          { q:'∂/∂x [x²y³] = ?', opts:['2xy³','3x²y²','2x²y²','xy³'], ans:0 },
+          { q:'The gradient ∇f points toward:', opts:['minimum','zero','steepest ascent','saddle point'], ans:2 },
+          { q:'Backprop computes:', opts:['Hessian','Jacobian of loss w.r.t. weights','eigenvalues','integrals'], ans:1 },
+        ]
+      },
+    ]
+  },
+  {
+    chapter: 'ADVANCED',
+    nodes: [
+      {
+        id:'lin_reg', icon:'📉', title:'Linear & Logistic Regression', color:'var(--ai)',
+        fields:['ai'], xp:100, requires:['matrices','distributions','optimization'],
+        desc:'The workhorses of supervised learning, fully derived.',
+        concepts:[
+          { name:'Linear Regression', body:'Model: ŷ = Xw + b. Loss: MSE = (1/n)Σ(yᵢ−ŷᵢ)². Closed form: w* = (XᵀX)⁻¹Xᵀy (Normal Equations). Geometric interpretation: w* is the projection of y onto the column space of X.' },
+          { name:'Ridge & Lasso', body:'Ridge (L2 reg): minimize ||y−Xw||² + λ||w||². Shrinks all weights smoothly. Lasso (L1 reg): ||w||₁ penalty produces <strong>sparse solutions</strong> (some weights → 0). Lasso does automatic feature selection.' },
+          { name:'Logistic Regression', body:'Binary classification. Sigmoid: σ(z) = 1/(1+e⁻ᶻ). Model: p(y=1|x) = σ(wᵀx+b). Loss: binary cross-entropy = −[y log(p) + (1−y)log(1−p)]. Gradient descent to optimize.' },
+          { name:'Softmax for Multi-class', body:'σ(z)ᵢ = eᶻⁱ/Σⱼeᶻʲ. Converts logits to probabilities (sum=1). Combined with cross-entropy loss: the standard recipe for any classification neural network output layer.' },
+        ],
+        formulas:['Normal eq: w* = (XᵀX)⁻¹Xᵀy','Sigmoid: σ(z) = 1/(1+e⁻ᶻ)','Softmax: p(yᵢ) = exp(zᵢ)/Σⱼ exp(zⱼ)'],
+        trick:'Logistic regression is linear regression passed through a sigmoid. The decision boundary is where wᵀx+b=0 — a hyperplane.',
+        quiz:[
+          { q:'Normal equations solve:', opts:['logistic regression','PCA','linear regression exactly','SVM'], ans:2 },
+          { q:'L1 regularization (Lasso) produces:', opts:['smooth weights','sparse weights','large weights','negative weights'], ans:1 },
+          { q:'Softmax output values sum to:', opts:['0','n','1','∞'], ans:2 },
+        ]
+      },
+      {
+        id:'neural_math', icon:'🧠', title:'Neural Network Mathematics', color:'var(--ai)',
+        fields:['ai'], xp:120, requires:['multivariable','lin_reg','info_theory'],
+        desc:'Backpropagation, universal approximation, and the math of deep learning.',
+        concepts:[
+          { name:'Forward Pass', body:'Layer l: z^l = W^l · a^(l−1) + b^l, a^l = σ(z^l). Each layer: linear transform + nonlinearity. The composition of many such layers creates a deep nonlinear function. Width and depth control expressivity.' },
+          { name:'Backpropagation', body:'Apply chain rule iteratively from output to input. δ^L = ∇L ⊙ σ\'(z^L). δ^l = (W^(l+1))ᵀ δ^(l+1) ⊙ σ\'(z^l). ∂L/∂W^l = δ^l (a^(l−1))ᵀ. This propagates the "blame" for error back through layers.' },
+          { name:'Universal Approximation', body:'A neural network with one hidden layer and enough neurons can approximate any continuous function on a compact domain. This is why deep learning works. More layers = more efficient representation, not just more capacity.' },
+          { name:'Vanishing Gradients', body:'Backprop multiplies many Jacobians. If weights < 1, gradients → 0 (vanishing). If > 1, gradients → ∞ (exploding). Solutions: <strong>ReLU</strong> (non-saturating), <strong>BatchNorm</strong>, <strong>residual connections</strong> (skip connections in ResNets).' },
+        ],
+        formulas:['Forward: z^l = W^l a^(l-1) + b^l','Error: δ^L = ∇_a L ⊙ σ\'(z^L)','Weight grad: ∂L/∂W^l = δ^l (a^(l-1))ᵀ'],
+        trick:'Backprop is just the chain rule applied to a computation graph. At each node: multiply upstream gradient by local Jacobian.',
+        quiz:[
+          { q:'Backprop computes gradients using:', opts:['finite differences','chain rule','integration','SVD'], ans:1 },
+          { q:'Vanishing gradient is solved by:', opts:['more data','ReLU activation','bigger batches','lower LR'], ans:1 },
+          { q:'Universal approximation theorem says a NN can approximate:', opts:['only linear functions','any continuous function','only polynomials','only step functions'], ans:1 },
+        ]
+      },
+    ]
+  }
+];
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let completed = JSON.parse(localStorage.getItem('mathTreeCompleted') || '[]');
+let xp = parseInt(localStorage.getItem('mathTreeXP') || '0');
+let activeFilter = 'all';
+let activeNode = null;
+let quizAnswered = [];
+
+function isUnlocked(node) {
+  return node.requires.every(r => completed.includes(r));
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('mathTreeCompleted', JSON.stringify(completed));
+    localStorage.setItem('mathTreeXP', String(xp));
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════
+//  RENDER TREE
+// ══════════════════════════════════════════
+function renderTree() {
+  const panel = document.getElementById('tree-panel');
+  panel.innerHTML = '';
+
+  const totalNodes = TREE.reduce((s,c) => s + c.nodes.length, 0);
+  const doneCount = TREE.reduce((s,c) => s + c.nodes.filter(n => completed.includes(n.id)).length, 0);
+  document.getElementById('prog-bar').style.width = (doneCount/totalNodes*100) + '%';
+  document.getElementById('xp-count').textContent = xp;
+
+  TREE.forEach((chapter, ci) => {
+    // filter
+    const visible = chapter.nodes.filter(n => {
+      if (activeFilter === 'all') return true;
+      return n.fields.includes(activeFilter);
+    });
+    if (!visible.length) return;
+
+    // Chapter label
+    const lbl = document.createElement('div');
+    lbl.className = 'chapter-label';
+    lbl.textContent = chapter.chapter;
+    panel.appendChild(lbl);
+
+    // Connector from previous
+    if (ci > 0) {
+      const conn = document.createElement('div');
+      conn.className = 'connector' + (ci > 0 ? ' lit' : '');
+      conn.style.height = '20px';
+      conn.style.setProperty('--c', visible[0]?.color || 'var(--stem)');
+      panel.appendChild(conn);
+    }
+
+    visible.forEach((node, ni) => {
+      const unlocked = isUnlocked(node);
+      const done = completed.includes(node.id);
+
+      // connector before each node (except first)
+      if (ni > 0) {
+        const conn = document.createElement('div');
+        conn.className = 'connector' + (done ? ' lit' : '');
+        conn.style.height = '12px';
+        conn.style.setProperty('--c', node.color);
+        panel.appendChild(conn);
+      }
+
+      const row = document.createElement('div');
+      row.className = 'node-row';
+
+      const nd = document.createElement('div');
+      nd.className = 'node' + (done ? ' done' : (!unlocked ? ' locked' : '')) + (activeNode === node.id ? ' active' : '');
+      nd.style.setProperty('--c', node.color);
+      nd.dataset.id = node.id;
+
+      const fieldBadges = node.fields.map(f => `<span class="badge badge-${f}">${f.toUpperCase()}</span>`).join('');
+      const statusText = done ? '✓ COMPLETE' : (!unlocked ? '🔒 LOCKED' : '▶ READY');
+      const statusClass = done ? 'status-done' : (!unlocked ? 'status-locked' : 'status-ready');
+
+      nd.innerHTML = `
+        <div class="node-top">
+          <div class="node-icon" style="--c:${node.color}">${node.icon}</div>
+          <div class="node-badges">${fieldBadges}</div>
+        </div>
+        <div class="node-title">${node.title}</div>
+        <div class="node-desc">${node.desc}</div>
+        <div class="node-footer">
+          <span class="node-xp">+${node.xp} XP</span>
+          <span class="node-status ${statusClass}">${statusText}</span>
+        </div>
+      `;
+
+      if (unlocked || done) {
+        nd.addEventListener('click', () => openLesson(node));
+      } else {
+        nd.addEventListener('click', () => showLockedMsg(node));
+      }
+
+      row.appendChild(nd);
+      panel.appendChild(row);
+
+      // connector after node
+      const conn2 = document.createElement('div');
+      conn2.className = 'connector' + (done ? ' lit' : '');
+      conn2.style.height = '12px';
+      conn2.style.setProperty('--c', node.color);
+      panel.appendChild(conn2);
+    });
+  });
+}
+
+// ══════════════════════════════════════════
+//  LESSON PANEL
+// ══════════════════════════════════════════
+function openLesson(node) {
+  activeNode = node.id;
+  quizAnswered = new Array(node.quiz.length).fill(null);
+  renderTree();
+
+  document.getElementById('lc-title').textContent = node.title;
+  document.getElementById('lesson-panel').style.setProperty('--lc', node.color);
+
+  const inner = document.getElementById('lesson-inner');
+  const done = completed.includes(node.id);
+
+  // Build quiz HTML
+  const quizHTML = node.quiz.map((q, qi) => `
+    <div class="quiz-q" id="qq-${qi}">
+      <div class="quiz-q-text">Q${qi+1}. ${q.q}</div>
+      <div class="quiz-options">
+        ${q.opts.map((o, oi) => `<button class="quiz-opt" onclick="answerQuiz('${node.id}',${qi},${oi},${q.ans})" id="qopt-${qi}-${oi}">${o}</button>`).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  inner.innerHTML = `
+    <div class="l-hero" style="--lc:${node.color}">
+      <span class="l-hero-icon">${node.icon}</span>
+      <div class="l-hero-title">${node.title}</div>
+      <div class="l-hero-desc">${node.desc}</div>
+    </div>
+
+    <div class="l-section">
+      <div class="l-section-title">Core Concepts</div>
+      ${node.concepts.map((c, i) => `
+        <div class="concept-block" style="--lc:${node.color}">
+          <div class="concept-head">
+            <span class="concept-num">${String(i+1).padStart(2,'0')}</span>
+            <span class="concept-name">${c.name}</span>
+          </div>
+          <div class="concept-body">${c.body}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="l-section">
+      <div class="l-section-title">Key Formulas</div>
+      <div class="formula-box" style="--lc:${node.color}">
+        <span class="flabel">Reference</span>
+        ${node.formulas.join('<br>')}
+      </div>
+    </div>
+
+    <div class="l-section">
+      <div class="l-section-title">Mental Shortcut</div>
+      <div class="trick-pill">
+        <span class="trick-emoji">⚡</span>
+        <span>${node.trick}</span>
+      </div>
+    </div>
+
+    <div class="l-section quiz-section">
+      <div class="l-section-title">Knowledge Check — ${node.quiz.length} Questions</div>
+      ${quizHTML}
+      <div class="quiz-result" id="quiz-result">
+        <span class="quiz-result-icon" id="qr-icon">🏆</span>
+        <div class="quiz-result-text" id="qr-text">Well done!</div>
+        <div class="quiz-result-sub" id="qr-sub">You passed!</div>
+      </div>
+      <button class="complete-btn ${done ? 'show' : ''}" id="complete-btn" style="background:${node.color}" onclick="completeNode('${node.id}', ${node.xp})">
+        ${done ? '✓ Completed — Review Anytime' : '✓ Mark Complete & Earn XP'}
+      </button>
+    </div>
+  `;
+
+  document.getElementById('lesson-panel').classList.add('open');
+}
+
+function closeLesson() {
+  document.getElementById('lesson-panel').classList.remove('open');
+  activeNode = null;
+  renderTree();
+}
+
+// ══════════════════════════════════════════
+//  QUIZ
+// ══════════════════════════════════════════
+function answerQuiz(nodeId, qi, chosen, correct) {
+  if (quizAnswered[qi] !== null) return;
+  quizAnswered[qi] = chosen;
+
+  const opts = document.querySelectorAll(`#qq-${qi} .quiz-opt`);
+  opts.forEach((o, i) => {
+    o.setAttribute('disabled', true);
+    if (i === correct) o.classList.add('correct');
+    else if (i === chosen && chosen !== correct) o.classList.add('wrong');
+  });
+
+  // Check if all answered
+  if (quizAnswered.every(a => a !== null)) {
+    const score = quizAnswered.filter((a,i) => {
+      const node = findNode(nodeId);
+      return a === node.quiz[i].ans;
+    }).length;
+    const total = quizAnswered.length;
+    const pass = score >= Math.ceil(total * 0.67);
+
+    const qr = document.getElementById('quiz-result');
+    qr.className = 'quiz-result show ' + (pass ? 'pass' : 'fail');
+    document.getElementById('qr-icon').textContent = pass ? '🎯' : '📚';
+    document.getElementById('qr-text').textContent = pass ? `${score}/${total} — Great!` : `${score}/${total} — Review & retry`;
+    document.getElementById('qr-sub').textContent = pass ? 'You can now mark this lesson complete.' : 'Study the concepts above and try again.';
+
+    if (pass) {
+      document.getElementById('complete-btn').classList.add('show');
+    }
+  }
+}
+
+function findNode(id) {
+  for (const ch of TREE) {
+    const n = ch.nodes.find(n => n.id === id);
+    if (n) return n;
+  }
+  return null;
+}
+
+// ══════════════════════════════════════════
+//  COMPLETE NODE
+// ══════════════════════════════════════════
+function completeNode(id, earnedXp) {
+  if (!completed.includes(id)) {
+    completed.push(id);
+    xp += earnedXp;
+    saveState();
+    showXpToast(`+${earnedXp} XP`);
+  }
+  document.getElementById('complete-btn').textContent = '✓ Completed — Review Anytime';
+  renderTree();
+}
+
+function showXpToast(msg) {
+  const t = document.getElementById('xp-toast');
+  t.textContent = '⚡ ' + msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function showLockedMsg(node) {
+  const needed = node.requires.filter(r => !completed.includes(r));
+  const names = needed.map(id => findNode(id)?.title || id).join(', ');
+  showXpToast(`🔒 Complete first: ${names}`);
+}
+
+// ══════════════════════════════════════════
+//  FILTER
+// ══════════════════════════════════════════
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTree();
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+renderTree();
+</script>
+</body>
+</html>
