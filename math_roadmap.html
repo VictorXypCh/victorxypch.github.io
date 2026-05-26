@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Fundamental Math Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --phys: #f97316;
+    --eng: #3b82f6;
+    --cs: #22c55e;
+    --ai: #a855f7;
+    --shared: #f59e0b;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    padding: 60px 24px 40px;
+    position: relative;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, #1a0a2e 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .title-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: clamp(2rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 30%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 500px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+  }
+
+  /* FIELD LEGEND */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 48px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .legend-item:hover { border-color: var(--muted); transform: translateY(-1px); }
+  .legend-item.active { border-color: var(--c); box-shadow: 0 0 12px color-mix(in srgb, var(--c) 30%, transparent); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+
+  /* LEVEL TABS */
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 48px;
+    padding: 0 24px;
+  }
+  .tab {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    padding: 8px 20px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab:hover { color: var(--text); border-color: var(--muted); }
+  .tab.active {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+    font-weight: 700;
+  }
+
+  /* MAIN GRID */
+  .main { max-width: 1100px; margin: 0 auto; padding: 0 24px 80px; }
+
+  /* LEVEL SECTION */
+  .level-section { display: none; }
+  .level-section.visible { display: block; }
+
+  .level-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .level-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--border);
+    line-height: 1;
+  }
+  .level-info h2 { font-size: 22px; font-weight: 800; }
+  .level-info p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  /* TOPIC CARDS */
+  .topics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .topic-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .topic-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--c, var(--border));
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .topic-card:hover {
+    border-color: color-mix(in srgb, var(--c, #fff) 40%, transparent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px #0005;
+  }
+  .topic-card:hover::before { opacity: 1; }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .card-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--c, #fff) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--c, #fff) 20%, transparent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .field-tags {
+    display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end;
+  }
+  .field-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    padding: 2px 7px;
+    border-radius: 100px;
+    background: color-mix(in srgb, var(--tc) 15%, transparent);
+    color: var(--tc);
+    border: 1px solid color-mix(in srgb, var(--tc) 30%, transparent);
+  }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .card-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+
+  .subtopics {
+    display: none;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .topic-card.expanded .subtopics { display: block; }
+  .subtopic-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .subtopic-item::before {
+    content: '→';
+    color: color-mix(in srgb, var(--c, #fff) 60%, transparent);
+    font-family: 'Space Mono', monospace;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .expand-btn {
+    width: 100%;
+    background: color-mix(in srgb, var(--c, #fff) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--c, #fff) 15%, transparent);
+    border-radius: 6px;
+    color: color-mix(in srgb, var(--c, #fff) 80%, #fff);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .expand-btn:hover { background: color-mix(in srgb, var(--c, #fff) 14%, transparent); }
+
+  /* ALL LEVELS VIEW */
+  .all-levels-timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+  .all-levels-timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px; top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--border), transparent);
+  }
+  .timeline-level {
+    position: relative;
+    margin-bottom: 40px;
+  }
+  .timeline-dot {
+    position: absolute;
+    left: -28px;
+    top: 4px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--text);
+    background: var(--bg);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .topics-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 2rem; }
+  }
+
+  /* FILTER FADE */
+  .topic-card.filtered { opacity: 0.15; pointer-events: none; }
+  .topic-card { transition: opacity 0.3s, transform 0.25s, border-color 0.25s, box-shadow 0.25s; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-label">Complete Learning Roadmap</div>
+  <h1>Fundamental Math<br/>for STEM & AI</h1>
+  <p class="subtitle">From arithmetic to cutting-edge machine learning mathematics — mapped across four disciplines.</p>
+
+  <div class="legend">
+    <div class="legend-item active" style="--c:var(--phys)" data-field="phys" onclick="toggleField('phys',this)">
+      <span class="legend-dot"></span> Physics
+    </div>
+    <div class="legend-item active" style="--c:var(--eng)" data-field="eng" onclick="toggleField('eng',this)">
+      <span class="legend-dot"></span> Engineering
+    </div>
+    <div class="legend-item active" style="--c:var(--cs)" data-field="cs" onclick="toggleField('cs',this)">
+      <span class="legend-dot"></span> Computer Science
+    </div>
+    <div class="legend-item active" style="--c:var(--ai)" data-field="ai" onclick="toggleField('ai',this)">
+      <span class="legend-dot"></span> AI / ML
+    </div>
+  </div>
+</header>
+
+<div style="text-align:center; padding: 0 24px 0;">
+  <div class="tabs">
+    <button class="tab active" onclick="showLevel('all',this)">All Levels</button>
+    <button class="tab" onclick="showLevel('beginner',this)">Beginner</button>
+    <button class="tab" onclick="showLevel('intermediate',this)">Intermediate</button>
+    <button class="tab" onclick="showLevel('advanced',this)">Advanced</button>
+    <button class="tab" onclick="showLevel('expert',this)">Expert</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ALL LEVELS -->
+  <div id="level-all" class="level-section visible">
+    <div style="display:grid; gap:12px; margin-bottom:48px;">
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; align-items:center; gap:16px;">
+        <div style="font-size:28px">🔰</div>
+        <div>
+          <div style="font-weight:700; font-size:15px; margin-bottom:4px;">Beginner</div>
+          <div style="color:var(--muted); font-size:13px;">Pre-Algebra · Algebra · Geometry · Trigonometry · Logic</div>
+        </div>
+        <div style="margin-left:auto; font-family:'Space Mono',monospace; font-size:11px; color:var(--muted);">Grade 6–10</div>
+      </div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; align-items:center; gap:16px;">
+        <div style="font-size:28px">📐</div>
+        <div>
+          <div style="font-weight:700; font-size:15px; margin-bottom:4px;">Intermediate</div>
+          <div style="color:var(--muted); font-size:13px;">Calculus · Linear Algebra · Discrete Math · Statistics</div>
+        </div>
+        <div style="margin-left:auto; font-family:'Space Mono',monospace; font-size:11px; color:var(--muted);">Grade 11 – Year 2</div>
+      </div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; align-items:center; gap:16px;">
+        <div style="font-size:28px">🔬</div>
+        <div>
+          <div style="font-weight:700; font-size:15px; margin-bottom:4px;">Advanced</div>
+          <div style="color:var(--muted); font-size:13px;">Multivariable Calculus · Diff. Equations · Numerical Methods · Probability Theory</div>
+        </div>
+        <div style="margin-left:auto; font-family:'Space Mono',monospace; font-size:11px; color:var(--muted);">Year 2–4</div>
+      </div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; display:flex; align-items:center; gap:16px;">
+        <div style="font-size:28px">🧠</div>
+        <div>
+          <div style="font-weight:700; font-size:15px; margin-bottom:4px;">Expert</div>
+          <div style="color:var(--muted); font-size:13px;">Real Analysis · Abstract Algebra · Topology · Tensor Calculus · Information Theory</div>
+        </div>
+        <div style="margin-left:auto; font-family:'Space Mono',monospace; font-size:11px; color:var(--muted);">Grad Level</div>
+      </div>
+    </div>
+    <div style="text-align:center; color:var(--muted); font-size:13px; margin-bottom:16px; font-family:'Space Mono',monospace;">← Click a level tab above for detailed topics →</div>
+  </div>
+
+  <!-- BEGINNER -->
+  <div id="level-beginner" class="level-section">
+    <div class="level-header">
+      <div class="level-num">01</div>
+      <div class="level-info">
+        <h2>Beginner — Building Blocks</h2>
+        <p>Grade 6–10 equivalent · No prior knowledge needed</p>
+      </div>
+    </div>
+    <div class="topics-grid" id="grid-beginner"></div>
+  </div>
+
+  <!-- INTERMEDIATE -->
+  <div id="level-intermediate" class="level-section">
+    <div class="level-header">
+      <div class="level-num">02</div>
+      <div class="level-info">
+        <h2>Intermediate — Core STEM Math</h2>
+        <p>Grade 11 – University Year 2 · Foundation of all four fields</p>
+      </div>
+    </div>
+    <div class="topics-grid" id="grid-intermediate"></div>
+  </div>
+
+  <!-- ADVANCED -->
+  <div id="level-advanced" class="level-section">
+    <div class="level-header">
+      <div class="level-num">03</div>
+      <div class="level-info">
+        <h2>Advanced — Specialization Math</h2>
+        <p>University Year 2–4 · Where fields diverge</p>
+      </div>
+    </div>
+    <div class="topics-grid" id="grid-advanced"></div>
+  </div>
+
+  <!-- EXPERT -->
+  <div id="level-expert" class="level-section">
+    <div class="level-header">
+      <div class="level-num">04</div>
+      <div class="level-info">
+        <h2>Expert — Graduate Level</h2>
+        <p>Research & Postgraduate · Deep theoretical understanding</p>
+      </div>
+    </div>
+    <div class="topics-grid" id="grid-expert"></div>
+  </div>
+
+</div>
+
+<script>
+const DATA = {
+  beginner: [
+    {
+      icon: '🔢', title: 'Pre-Algebra & Arithmetic', color: 'shared',
+      fields: ['phys','eng','cs','ai'],
+      desc: 'The absolute starting point — numbers, operations, fractions, and basic equations.',
+      subtopics: [
+        'Natural numbers, integers, rational & real numbers',
+        'Addition, subtraction, multiplication, division',
+        'Fractions, decimals, percentages',
+        'Order of operations (PEMDAS/BODMAS)',
+        'Basic number patterns and sequences'
+      ]
+    },
+    {
+      icon: '📊', title: 'Algebra I & II', color: 'shared',
+      fields: ['phys','eng','cs','ai'],
+      desc: 'Variables, equations, functions — the language of all quantitative science.',
+      subtopics: [
+        'Variables and expressions',
+        'Linear equations and inequalities',
+        'Quadratic equations (factoring, quadratic formula)',
+        'Polynomials and rational expressions',
+        'Systems of equations',
+        'Exponents, radicals, and logarithms'
+      ]
+    },
+    {
+      icon: '📐', title: 'Geometry', color: 'phys',
+      fields: ['phys','eng','cs'],
+      desc: 'Shapes, space, angles, and measurements — foundation of graphics and mechanics.',
+      subtopics: [
+        'Points, lines, planes and angles',
+        'Triangles, circles, polygons',
+        'Area, perimeter, volume, surface area',
+        'Pythagorean theorem',
+        'Coordinate geometry basics',
+        'Transformations: rotation, reflection, translation'
+      ]
+    },
+    {
+      icon: '📡', title: 'Trigonometry', color: 'phys',
+      fields: ['phys','eng','ai'],
+      desc: 'Sine, cosine, tangent — essential for waves, signals, and rotations.',
+      subtopics: [
+        'Right triangle trigonometry (SOH-CAH-TOA)',
+        'Unit circle and radian measure',
+        'Trig functions: sin, cos, tan and inverses',
+        'Trig identities and equations',
+        'Graphs of trig functions (periodicity, amplitude)',
+        'Applications to vectors and waves'
+      ]
+    },
+    {
+      icon: '⚙️', title: 'Pre-Calculus & Functions', color: 'shared',
+      fields: ['phys','eng','cs','ai'],
+      desc: 'Functions, limits, and mathematical reasoning — bridge to calculus.',
+      subtopics: [
+        'Domain, range, composition of functions',
+        'Polynomial, exponential, logarithmic functions',
+        'Inverse functions',
+        'Introduction to limits (informal)',
+        'Sequences and series (arithmetic & geometric)',
+        'Conic sections (parabola, ellipse, hyperbola)'
+      ]
+    },
+    {
+      icon: '🧮', title: 'Logic & Proof Basics', color: 'cs',
+      fields: ['cs','ai'],
+      desc: 'Propositional logic and proof strategies — the backbone of programming and algorithms.',
+      subtopics: [
+        'Propositions, truth tables',
+        'AND, OR, NOT, XOR operators',
+        'Conditional and biconditional statements',
+        'Direct proof, proof by contradiction',
+        'Mathematical induction basics',
+        'Sets: union, intersection, complement'
+      ]
+    }
+  ],
+  intermediate: [
+    {
+      icon: '∫', title: 'Calculus I — Differential', color: 'shared',
+      fields: ['phys','eng','cs','ai'],
+      desc: 'Derivatives measure instantaneous rate of change. Foundational for optimization in all fields.',
+      subtopics: [
+        'Limits and continuity (ε-δ definition)',
+        'Derivative definition from first principles',
+        'Differentiation rules (product, quotient, chain rule)',
+        'Implicit differentiation',
+        'Related rates and linear approximation',
+        'Applications: optimization, curve sketching',
+        'L\'Hôpital\'s rule'
+      ]
+    },
+    {
+      icon: '∑', title: 'Calculus II — Integral', color: 'shared',
+      fields: ['phys','eng','cs','ai'],
+      desc: 'Integration computes areas, volumes, accumulated quantities, and probability.',
+      subtopics: [
+        'Antiderivatives and indefinite integrals',
+        'Fundamental Theorem of Calculus',
+        'Integration techniques (substitution, by parts, partial fractions)',
+        'Definite integrals and area',
+        'Improper integrals',
+        'Taylor and Maclaurin series',
+        'Convergence tests for series'
+      ]
+    },
+    {
+      icon: '🔲', title: 'Linear Algebra', color: 'shared',
+      fields: ['phys','eng','cs','ai'],
+      desc: 'The most important math for ML and CS. Vectors, matrices, transformations.',
+      subtopics: [
+        'Vectors: operations, dot product, cross product',
+        'Matrices: addition, multiplication, transpose',
+        'Systems of linear equations and Gaussian elimination',
+        'Determinants and matrix inverses',
+        'Vector spaces, subspaces, basis, span',
+        'Eigenvalues and eigenvectors',
+        'Orthogonality, projection, Gram-Schmidt',
+        'Singular Value Decomposition (SVD) intro'
+      ]
+    },
+    {
+      icon: '🎲', title: 'Probability & Statistics', color: 'shared',
+      fields: ['phys','eng','cs','ai'],
+      desc: 'Quantifying uncertainty — the language of data science and inference.',
+      subtopics: [
+        'Sample spaces, events, probability axioms',
+        'Conditional probability, Bayes\' theorem',
+        'Discrete distributions (Binomial, Poisson, Geometric)',
+        'Continuous distributions (Normal, Exponential, Uniform)',
+        'Expected value, variance, standard deviation',
+        'Central Limit Theorem',
+        'Hypothesis testing and p-values',
+        'Confidence intervals, regression basics'
+      ]
+    },
+    {
+      icon: '🗂️', title: 'Discrete Mathematics', color: 'cs',
+      fields: ['cs','ai'],
+      desc: 'Combinatorics, graphs, and algorithms — the math under every program.',
+      subtopics: [
+        'Counting: permutations and combinations',
+        'Pigeonhole principle, inclusion-exclusion',
+        'Graph theory: vertices, edges, paths, trees',
+        'Recurrence relations',
+        'Big-O notation and algorithm complexity',
+        'Boolean algebra',
+        'Modular arithmetic and number theory'
+      ]
+    },
+    {
+      icon: '📈', title: 'Analytic Geometry & Vectors', color: 'eng',
+      fields: ['phys','eng'],
+      desc: 'Geometric reasoning in coordinate systems — key to mechanics and structural analysis.',
+      subtopics: [
+        '2D and 3D coordinate systems',
+        'Vector addition, scaling, unit vectors',
+        'Lines, planes and their equations in 3D',
+        'Distance and angle formulas',
+        'Dot and cross products with physical meaning',
+        'Introduction to parametric curves'
+      ]
+    }
+  ],
+  advanced: [
+    {
+      icon: '🌐', title: 'Multivariable Calculus', color: 'phys',
+      fields: ['phys','eng','ai'],
+      desc: 'Extends calculus to multiple dimensions — essential for fields, gradients, neural networks.',
+      subtopics: [
+        'Partial derivatives and gradient vectors',
+        'Directional derivatives',
+        'Multiple integrals (double, triple)',
+        'Change of variables and Jacobians',
+        'Vector fields, divergence, curl',
+        'Line integrals and surface integrals',
+        'Green\'s, Stokes\', and Gauss\' Divergence theorems'
+      ]
+    },
+    {
+      icon: '〰️', title: 'Differential Equations', color: 'phys',
+      fields: ['phys','eng','ai'],
+      desc: 'Equations involving derivatives — model everything from circuits to population dynamics.',
+      subtopics: [
+        'First-order ODEs (separable, linear, exact)',
+        'Second-order linear ODEs with constant coefficients',
+        'Systems of ODEs and phase plane analysis',
+        'Laplace transforms and their inverse',
+        'Introduction to Partial Differential Equations (PDEs)',
+        'Heat equation, wave equation, Laplace equation',
+        'Numerical methods (Euler, Runge-Kutta)'
+      ]
+    },
+    {
+      icon: '🔀', title: 'Numerical Methods', color: 'eng',
+      fields: ['eng','cs','ai'],
+      desc: 'Algorithms for solving mathematical problems computationally.',
+      subtopics: [
+        'Root finding: bisection, Newton-Raphson',
+        'Numerical integration (Simpson\'s rule, Gaussian quadrature)',
+        'Numerical differentiation and finite differences',
+        'Linear systems: LU decomposition, iterative methods',
+        'Least squares and curve fitting',
+        'Interpolation: Lagrange, splines',
+        'Numerical ODE solvers'
+      ]
+    },
+    {
+      icon: '📡', title: 'Fourier Analysis & Signal Processing', color: 'eng',
+      fields: ['phys','eng','cs','ai'],
+      desc: 'Decomposing functions into frequency components — key for audio, images, and data.',
+      subtopics: [
+        'Fourier series for periodic functions',
+        'Fourier transform (continuous and discrete)',
+        'Fast Fourier Transform (FFT) algorithm',
+        'Convolution theorem',
+        'Sampling theorem and Nyquist frequency',
+        'Filters and frequency domain analysis',
+        'Applications to image compression and audio'
+      ]
+    },
+    {
+      icon: '📊', title: 'Advanced Probability Theory', color: 'ai',
+      fields: ['cs','ai'],
+      desc: 'Rigorous probability — the mathematical core of machine learning.',
+      subtopics: [
+        'Measure-theoretic probability basics',
+        'Random variables and distributions in depth',
+        'Markov chains and processes',
+        'Monte Carlo methods',
+        'Bayesian inference and conjugate priors',
+        'Maximum likelihood estimation (MLE)',
+        'Information theory: entropy, KL divergence, mutual information'
+      ]
+    },
+    {
+      icon: '⚡', title: 'Complex Analysis', color: 'phys',
+      fields: ['phys','eng'],
+      desc: 'Complex numbers extended to calculus — key for electromagnetism and control theory.',
+      subtopics: [
+        'Complex numbers: arithmetic, polar form, exponential form',
+        'Analytic functions, Cauchy-Riemann equations',
+        'Complex integration and Cauchy\'s theorem',
+        'Residues and poles',
+        'Conformal mappings',
+        'Applications to fluid flow, electrostatics, signal processing'
+      ]
+    },
+    {
+      icon: '🧩', title: 'Optimization Theory', color: 'ai',
+      fields: ['eng','cs','ai'],
+      desc: 'Finding minima and maxima — the engine of machine learning training.',
+      subtopics: [
+        'Unconstrained optimization: gradient descent, Newton\'s method',
+        'Constrained optimization: Lagrange multipliers',
+        'KKT conditions',
+        'Convex sets and convex functions',
+        'Convex optimization problems',
+        'Stochastic gradient descent (SGD) and variants',
+        'Linear programming and simplex method'
+      ]
+    }
+  ],
+  expert: [
+    {
+      icon: '∞', title: 'Real Analysis', color: 'phys',
+      fields: ['phys','cs','ai'],
+      desc: 'Rigorous foundations of calculus — continuity, convergence, measure theory.',
+      subtopics: [
+        'Topology of real numbers, open/closed sets',
+        'Sequences and series with rigorous proofs',
+        'Continuity and uniform continuity',
+        'Differentiation theory and Mean Value theorems',
+        'Riemann and Lebesgue integration',
+        'Convergence of function sequences',
+        'Metric spaces and completeness'
+      ]
+    },
+    {
+      icon: '🏗️', title: 'Abstract Algebra', color: 'cs',
+      fields: ['cs','ai'],
+      desc: 'Groups, rings, fields — algebraic structures underlying cryptography and coding theory.',
+      subtopics: [
+        'Group theory: subgroups, homomorphisms, quotient groups',
+        'Rings and ideals',
+        'Fields and field extensions',
+        'Galois theory basics',
+        'Applications to error-correcting codes',
+        'Finite fields (GF(2^n)) and cryptography',
+        'Category theory introduction'
+      ]
+    },
+    {
+      icon: '🌀', title: 'Differential Geometry & Tensor Calculus', color: 'phys',
+      fields: ['phys','ai'],
+      desc: 'Geometry on curved spaces — Einstein\'s relativity and modern deep learning.',
+      subtopics: [
+        'Manifolds, tangent spaces, differential forms',
+        'Riemannian metrics and curvature',
+        'Covariant derivatives and parallel transport',
+        'Tensors: contravariant, covariant, mixed',
+        'Tensor operations (contraction, outer product)',
+        'Einstein notation',
+        'Applications: General Relativity, geometric deep learning'
+      ]
+    },
+    {
+      icon: '🎯', title: 'Functional Analysis', color: 'phys',
+      fields: ['phys','ai'],
+      desc: 'Infinite-dimensional linear algebra — Hilbert spaces, operators, quantum mechanics.',
+      subtopics: [
+        'Normed and Banach spaces',
+        'Hilbert spaces and inner product spaces',
+        'Bounded linear operators',
+        'Spectral theory',
+        'Distributions and Sobolev spaces',
+        'Applications to quantum mechanics',
+        'Reproducing Kernel Hilbert Spaces (RKHS) for ML'
+      ]
+    },
+    {
+      icon: '🔐', title: 'Information Theory & Statistical Learning', color: 'ai',
+      fields: ['cs','ai'],
+      desc: 'The theoretical foundations of AI, communication, and data compression.',
+      subtopics: [
+        'Shannon entropy and information content',
+        'Mutual information, channel capacity',
+        'Data compression: Huffman, arithmetic coding',
+        'Rate-distortion theory',
+        'PAC learning framework',
+        'VC dimension and generalization bounds',
+        'Rademacher complexity',
+        'Minimum Description Length principle'
+      ]
+    },
+    {
+      icon: '🌊', title: 'Stochastic Processes & Calculus', color: 'ai',
+      fields: ['phys','eng','ai'],
+      desc: 'Probability over time — diffusion models, financial math, random processes.',
+      subtopics: [
+        'Brownian motion and Wiener process',
+        'Martingales',
+        'Itô\'s lemma and Itô calculus',
+        'Stochastic differential equations (SDEs)',
+        'Fokker-Planck equation',
+        'Markov Decision Processes (MDPs)',
+        'Applications to diffusion models and reinforcement learning'
+      ]
+    }
+  ]
+};
+
+const COLORS = { phys: '#f97316', eng: '#3b82f6', cs: '#22c55e', ai: '#a855f7', shared: '#f59e0b' };
+const FIELD_LABELS = { phys: 'PHYSICS', eng: 'ENGINEERING', cs: 'CS', ai: 'AI/ML' };
+
+let activeFields = new Set(['phys','eng','cs','ai']);
+
+function renderGrid(level) {
+  const grid = document.getElementById(`grid-${level}`);
+  if (!grid) return;
+  grid.innerHTML = '';
+  DATA[level].forEach((topic, i) => {
+    const c = COLORS[topic.color];
+    const card = document.createElement('div');
+    card.className = 'topic-card';
+    card.style.setProperty('--c', c);
+    card.dataset.fields = topic.fields.join(',');
+
+    const fieldTags = topic.fields.map(f =>
+      `<span class="field-tag" style="--tc:${COLORS[f]}">${FIELD_LABELS[f]}</span>`
+    ).join('');
+
+    const subs = topic.subtopics.map(s => `<div class="subtopic-item">${s}</div>`).join('');
+
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-icon" style="--c:${c}">${topic.icon}</div>
+        <div class="field-tags">${fieldTags}</div>
+      </div>
+      <div class="card-title">${topic.title}</div>
+      <div class="card-desc">${topic.desc}</div>
+      <button class="expand-btn" onclick="toggleCard(this.closest('.topic-card'))">▾ View Topics</button>
+      <div class="subtopics">${subs}</div>
+    `;
+    grid.appendChild(card);
+    applyFilter(card);
+  });
+}
+
+function toggleCard(card) {
+  const expanded = card.classList.toggle('expanded');
+  card.querySelector('.expand-btn').textContent = expanded ? '▴ Hide Topics' : '▾ View Topics';
+}
+
+function showLevel(level, btn) {
+  document.querySelectorAll('.level-section').forEach(s => s.classList.remove('visible'));
+  document.getElementById(`level-${level}`).classList.add('visible');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function toggleField(field, el) {
+  if (activeFields.has(field)) {
+    if (activeFields.size === 1) return; // keep at least 1
+    activeFields.delete(field);
+    el.classList.remove('active');
+  } else {
+    activeFields.add(field);
+    el.classList.add('active');
+  }
+  document.querySelectorAll('.topic-card').forEach(card => applyFilter(card));
+}
+
+function applyFilter(card) {
+  const cardFields = card.dataset.fields.split(',');
+  const visible = cardFields.some(f => activeFields.has(f));
+  card.classList.toggle('filtered', !visible);
+}
+
+// Render all grids
+['beginner','intermediate','advanced','expert'].forEach(renderGrid);
+</script>
+</body>
+</html>
