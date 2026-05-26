@@ -1,106 +1,1447 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv='cache-control' content='no-cache'> 
-    <meta http-equiv='expires' content='0'> 
-    <meta http-equiv='pragma' content='no-cache'>
-    <title>Chess Club Rankings</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Quick Math Trainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Clash+Display:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #2a2a2a;
-            color: #e2e2e2;
-            text-align: center;
-            margin-top: 50px;
-        }
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Outfit:wght@300;400;600;700;800&display=swap');
 
-        h1 {
-            color: #e2b714;
-            font-size: 2.5em;
-            margin-bottom: 30px;
-            font-weight: bold;
-        }
+:root {
+  --bg: #f5f0e8;
+  --ink: #1a1208;
+  --mid: #6b5e45;
+  --faint: #e2d9c8;
+  --card: #fff9f0;
+  --gold: #d4860a;
+  --green: #2d7a4f;
+  --red: #c0392b;
+  --blue: #1a5f9e;
+  --accent: #d4860a;
+  --shadow: 0 2px 0 #1a120820;
+}
 
-        table {
-            width: 100%;
-            margin: 0 auto;
-            border-collapse: collapse;
-        }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        
-        /* Media query for desktops and larger screens */
-        @media (min-width: 768px) {
-            table {
-                width: 50%;  /* 50% width on larger screens */
-            }
-        }
+body {
+  background: var(--bg);
+  background-image:
+    radial-gradient(circle at 20% 20%, #e8dcc820 0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231a1208' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  color: var(--ink);
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-        table, th, td {
-            border: 1px solid #444;
-        }
+/* ── HEADER ── */
+.app-header {
+  width: 100%;
+  max-width: 680px;
+  padding: 32px 24px 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+.app-logo {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--mid);
+  text-transform: uppercase;
+}
+.streak-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--ink);
+  color: var(--bg);
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.streak-fire { font-size: 14px; }
 
-        th, td {
-            padding: 15px 25px;
-            text-align: left;
-        }
+/* ── MAIN CONTAINER ── */
+.container {
+  width: 100%;
+  max-width: 680px;
+  padding: 24px;
+  flex: 1;
+}
 
-        th {
-            background-color: #e2b714;
-            color: #333;
-        }
+/* ── MODE SELECT SCREEN ── */
+#screen-menu { display: flex; flex-direction: column; gap: 16px; }
 
-        tr:nth-child(even) {
-            background-color: #3a3a3a;
-        }
+.screen-title {
+  font-size: clamp(2rem, 7vw, 3.2rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+.screen-sub {
+  color: var(--mid);
+  font-size: 15px;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
 
-        tr:hover {
-            background-color: #505050;
-        }
-    </style>
+.mode-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mode-card {
+  background: var(--card);
+  border: 2px solid var(--faint);
+  border-radius: 16px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.18s;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+.mode-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  box-shadow: inset 0 1px 0 #ffffff80;
+  pointer-events: none;
+}
+.mode-card:hover {
+  border-color: var(--ink);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px #1a120815;
+}
+.mode-card.selected {
+  border-color: var(--gold);
+  background: #fff8ed;
+  box-shadow: 0 0 0 3px #d4860a20;
+}
+.mode-icon { font-size: 28px; margin-bottom: 10px; display: block; }
+.mode-name { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.mode-desc { font-size: 12px; color: var(--mid); line-height: 1.5; }
+
+.difficulty-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+.diff-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 4px;
+  border: 2px solid var(--faint);
+  border-radius: 10px;
+  background: var(--card);
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--mid);
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+}
+.diff-btn:hover { border-color: var(--mid); color: var(--ink); }
+.diff-btn.active { border-color: var(--ink); background: var(--ink); color: var(--bg); }
+
+.start-btn {
+  width: 100%;
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  border-radius: 14px;
+  padding: 18px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 0 #1a120840;
+}
+.start-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 0 #1a120840; }
+.start-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #1a120840; }
+
+/* ── DRILL SCREEN ── */
+#screen-drill { display: none; }
+
+.drill-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.drill-mode-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--mid);
+  text-transform: uppercase;
+}
+.score-pill {
+  display: flex;
+  gap: 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+}
+.score-correct { color: var(--green); font-weight: 500; }
+.score-wrong { color: var(--red); font-weight: 500; }
+
+/* TIMER BAR */
+.timer-wrap { margin-bottom: 20px; }
+.timer-bar-bg {
+  height: 6px;
+  background: var(--faint);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.timer-bar-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 100px;
+  transition: width 0.1s linear, background 0.3s;
+  width: 100%;
+}
+.timer-bar-fill.danger { background: var(--red); }
+.timer-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--mid);
+  text-align: right;
+  margin-top: 4px;
+}
+
+/* QUESTION CARD */
+.question-card {
+  background: var(--card);
+  border: 2px solid var(--faint);
+  border-radius: 20px;
+  padding: 36px 28px 28px;
+  margin-bottom: 20px;
+  text-align: center;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 0 #1a120810;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.question-card.correct-flash { border-color: var(--green); background: #f0faf4; }
+.question-card.wrong-flash { border-color: var(--red); background: #fdf0f0; }
+
+.q-category {
+  position: absolute;
+  top: 14px; left: 18px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--mid);
+  text-transform: uppercase;
+}
+.q-number {
+  position: absolute;
+  top: 14px; right: 18px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--mid);
+}
+
+.question-text {
+  font-size: clamp(2.4rem, 9vw, 4rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 8px;
+  letter-spacing: -1px;
+}
+.question-hint {
+  font-size: 13px;
+  color: var(--mid);
+  font-style: italic;
+}
+
+/* ANSWER DISPLAY */
+.answer-display {
+  background: var(--card);
+  border: 2px solid var(--faint);
+  border-radius: 14px;
+  padding: 14px 20px;
+  font-family: 'DM Mono', monospace;
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--ink);
+  text-align: center;
+  margin-bottom: 14px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 2px;
+  transition: border-color 0.15s;
+}
+.answer-display.has-value { border-color: var(--gold); }
+.answer-display .placeholder { color: var(--faint); font-size: 20px; }
+
+/* NUMPAD */
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.np-btn {
+  background: var(--card);
+  border: 2px solid var(--faint);
+  border-radius: 12px;
+  padding: 0;
+  height: 56px;
+  font-family: 'DM Mono', monospace;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.1s;
+  box-shadow: 0 3px 0 #1a120815;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.np-btn:active { transform: translateY(2px); box-shadow: none; background: var(--faint); }
+.np-btn.np-neg { font-size: 24px; }
+.np-btn.np-del { font-size: 18px; color: var(--mid); }
+.np-btn.np-submit {
+  grid-column: span 3;
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+  font-size: 16px;
+  letter-spacing: 1px;
+  height: 52px;
+  box-shadow: 0 4px 0 #1a120840;
+}
+.np-btn.np-submit:active { transform: translateY(3px); box-shadow: 0 1px 0 #1a120840; }
+
+/* TRICK PANEL */
+.trick-panel {
+  background: #fffbf0;
+  border: 1.5px solid #e8d5a0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  display: none;
+  animation: fadeUp 0.3s ease forwards;
+}
+.trick-panel.visible { display: flex; gap: 10px; align-items: flex-start; }
+.trick-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.trick-body { flex: 1; }
+.trick-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #a07830;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.trick-text { font-size: 13px; color: var(--ink); line-height: 1.5; }
+.trick-text strong { color: var(--gold); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.feedback-bar {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  transition: all 0.2s;
+  opacity: 0;
+}
+.feedback-bar.show { opacity: 1; }
+.feedback-bar.correct { background: #e8f7ee; color: var(--green); }
+.feedback-bar.wrong { background: #fdecea; color: var(--red); }
+
+/* SKIP */
+.skip-btn {
+  width: 100%;
+  background: transparent;
+  border: 2px solid var(--faint);
+  border-radius: 10px;
+  padding: 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--mid);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+.skip-btn:hover { border-color: var(--mid); color: var(--ink); }
+
+/* PROGRESS DOTS */
+.progress-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 20px;
+}
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--faint);
+  transition: background 0.2s;
+}
+.dot.done-correct { background: var(--green); }
+.dot.done-wrong { background: var(--red); }
+.dot.current { background: var(--gold); transform: scale(1.3); }
+
+/* ── RESULTS SCREEN ── */
+#screen-results { display: none; text-align: center; }
+
+.result-emoji { font-size: 64px; margin-bottom: 16px; display: block; }
+.result-title { font-size: 2.4rem; font-weight: 800; margin-bottom: 8px; }
+.result-sub { color: var(--mid); font-size: 15px; margin-bottom: 32px; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.stat-box {
+  background: var(--card);
+  border: 2px solid var(--faint);
+  border-radius: 14px;
+  padding: 18px 12px;
+}
+.stat-val { font-size: 2rem; font-weight: 800; margin-bottom: 4px; }
+.stat-label { font-size: 11px; color: var(--mid); font-family: 'DM Mono', monospace; letter-spacing: 1px; text-transform: uppercase; }
+
+.review-list { text-align: left; margin-bottom: 28px; }
+.review-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--mid);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.review-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+.review-item.ri-correct { background: #e8f7ee; }
+.review-item.ri-wrong { background: #fdecea; }
+.review-q { font-weight: 600; font-family: 'DM Mono', monospace; }
+.review-a { font-size: 12px; color: var(--mid); }
+.review-icon { font-size: 16px; }
+
+.result-btns { display: flex; gap: 10px; }
+.btn-retry {
+  flex: 1;
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 3px 0 #1a120840;
+}
+.btn-retry:hover { transform: translateY(-1px); box-shadow: 0 5px 0 #1a120840; }
+.btn-menu {
+  flex: 1;
+  background: var(--card);
+  color: var(--ink);
+  border: 2px solid var(--faint);
+  border-radius: 12px;
+  padding: 16px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-menu:hover { border-color: var(--ink); }
+
+/* ── GUIDE BUTTON ── */
+.guide-btn {
+  background: var(--card);
+  border: 2px solid var(--faint);
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--mid);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-transform: uppercase;
+}
+.guide-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ── GUIDE SCREEN ── */
+#screen-guide { display: none; flex-direction: column; gap: 0; }
+
+.guide-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.guide-back {
+  background: var(--card); border: 2px solid var(--faint);
+  border-radius: 10px; padding: 8px 14px; font-size: 16px;
+  cursor: pointer; transition: all 0.15s;
+}
+.guide-back:hover { border-color: var(--ink); }
+.guide-title { font-size: 22px; font-weight: 800; }
+
+.guide-tabs {
+  display: flex; gap: 4px; background: var(--faint);
+  border-radius: 12px; padding: 4px; margin-bottom: 20px;
+}
+.gtab {
+  flex: 1; padding: 8px 4px; border: none; background: transparent;
+  border-radius: 9px; font-family: 'Outfit', sans-serif; font-size: 12px;
+  font-weight: 600; color: var(--mid); cursor: pointer; transition: all 0.18s; text-align: center;
+}
+.gtab.active { background: var(--card); color: var(--ink); box-shadow: 0 1px 4px #1a120815; }
+
+.guide-panel { display: none; }
+.guide-panel.active { display: block; }
+
+.g-section {
+  background: var(--card); border: 1.5px solid var(--faint);
+  border-radius: 14px; padding: 18px; margin-bottom: 12px;
+}
+.g-section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.g-section-icon {
+  width: 36px; height: 36px; border-radius: 10px; background: var(--faint);
+  display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0;
+}
+.g-section-title { font-size: 15px; font-weight: 700; }
+.g-section-sub { font-size: 12px; color: var(--mid); margin-top: 1px; }
+.g-item {
+  display: flex; gap: 10px; padding: 8px 0;
+  border-top: 1px solid var(--faint); font-size: 13.5px; line-height: 1.6;
+}
+.g-item:first-of-type { border-top: none; padding-top: 0; }
+.g-bullet { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--gold); font-weight: 700; flex-shrink: 0; padding-top: 3px; min-width: 20px; }
+.g-item-body { color: var(--ink); }
+.g-item-body strong { color: var(--gold); }
+.g-item-body em { color: var(--mid); font-style: italic; }
+
+.technique-card {
+  background: linear-gradient(135deg, #1a1208 0%, #2d1f0a 100%);
+  border-radius: 16px; padding: 20px; margin-bottom: 12px;
+  color: var(--bg); position: relative; overflow: hidden;
+}
+.technique-card::before {
+  content: ''; position: absolute; top: -20px; right: -20px;
+  width: 100px; height: 100px;
+  background: radial-gradient(circle, #d4860a20, transparent 70%); pointer-events: none;
+}
+.tc-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.tc-num { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 700; color: var(--gold); line-height: 1; flex-shrink: 0; }
+.tc-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+.tc-origin { font-size: 11px; color: #a09070; font-family: 'DM Mono', monospace; letter-spacing: 1px; }
+.tc-body { font-size: 13px; color: #c8b898; line-height: 1.7; }
+.tc-steps { margin-top: 10px; padding-top: 10px; border-top: 1px solid #ffffff15; }
+.tc-step { display: flex; gap: 8px; font-size: 12.5px; color: #c8b898; padding: 4px 0; line-height: 1.5; }
+.tc-step-num { color: var(--gold); font-family: 'DM Mono', monospace; font-size: 11px; flex-shrink: 0; padding-top: 1px; }
+
+.week-plan { display: grid; gap: 8px; }
+.week-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--card); border: 1.5px solid var(--faint);
+  border-radius: 10px; padding: 10px 14px;
+}
+.week-day { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; color: var(--mid); text-transform: uppercase; min-width: 36px; }
+.week-task { font-size: 13px; flex: 1; }
+.week-badge { font-size: 10px; padding: 2px 8px; border-radius: 100px; font-family: 'DM Mono', monospace; letter-spacing: 0.5px; background: var(--faint); color: var(--mid); }
+.week-badge.focus { background: #fff0dc; color: var(--gold); }
+
+/* ANIMATION */
+@keyframes popIn {
+  0% { transform: scale(0.92); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.pop { animation: popIn 0.2s ease forwards; }
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+}
+.shake { animation: shake 0.35s ease; }
+
+@media (max-width: 480px) {
+  .mode-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: repeat(3,1fr); }
+  .question-text { font-size: 2.4rem; }
+}
+</style>
 </head>
 <body>
-    <h1>Chess Club Rankings</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Total Points</th>
-            </tr>
-        </thead>
-        <tbody id="playersTable">
-            <!-- Data will be populated here by JavaScript -->
-        </tbody>
-    </table>
 
-    <script>
-  var playersData = [
-            {"name": "Tigger", "total": 13.5 + 5},
-            {"name": "kayden", "total": 10.5 + 5},
-            {"name": "marvin", "total": 12},
-            {"name": "alwin", "total": 6 + 4},
-            {"name": "aek", "total": 6.5 + 3},
-            {"name": "athira", "total": 8},
-            {"name": "tonka", "total": 8},
-            {"name": "roy", "total": 8},
-            {"name": "dandy", "total": 5 + 1},
-            {"name": "eric", "total": 5 + 4},
-            {"name": "naphat", "total": 4},
-            {"name": "alieng", "total": 1},
-            {"name": "ayyan", "total": 0.5}
-        ];
+<div class="app-header">
+  <div class="app-logo">⚡ QuickMath STEM</div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button class="guide-btn" onclick="showGuide()">📖 Guide</button>
+    <div class="streak-badge"><span class="streak-fire">🔥</span> <span id="streak-count">0</span> streak</div>
+  </div>
+</div>
 
-        var tableBody = document.getElementById('playersTable');
+<div class="container">
 
-        for (var i = 0; i < playersData.length; i++) {
-            var row = tableBody.insertRow();
-            var cell1 = row.insertCell(0);
-            var cell2 = row.insertCell(1);
-            cell1.innerHTML = playersData[i].name;
-            cell2.innerHTML = playersData[i].total;
-        }
-    </script>
+  <!-- MENU SCREEN -->
+  <div id="screen-menu">
+    <div>
+      <div class="screen-title">Train your<br/>math reflexes.</div>
+      <div class="screen-sub">Daily drills designed for Physics, Engineering, CS & AI learners. Build speed that sticks.</div>
+    </div>
+
+    <div class="mode-grid">
+      <div class="mode-card selected" data-mode="multiplication" onclick="selectMode(this)">
+        <span class="mode-icon">✖️</span>
+        <div class="mode-name">Multiplication</div>
+        <div class="mode-desc">Times tables up to 20×20 for instant recall</div>
+      </div>
+      <div class="mode-card" data-mode="squares" onclick="selectMode(this)">
+        <span class="mode-icon">²</span>
+        <div class="mode-name">Squares & Roots</div>
+        <div class="mode-desc">n² and √n — critical for geometry & ML</div>
+      </div>
+      <div class="mode-card" data-mode="powers2" onclick="selectMode(this)">
+        <span class="mode-icon">💻</span>
+        <div class="mode-name">Powers of 2</div>
+        <div class="mode-desc">2⁰ to 2¹⁶ — binary fluency for CS</div>
+      </div>
+      <div class="mode-card" data-mode="fractions" onclick="selectMode(this)">
+        <span class="mode-icon">½</span>
+        <div class="mode-name">Fractions→Decimals</div>
+        <div class="mode-desc">Instant fraction conversion for probability</div>
+      </div>
+      <div class="mode-card" data-mode="estimation" onclick="selectMode(this)">
+        <span class="mode-icon">🎯</span>
+        <div class="mode-name">Estimation</div>
+        <div class="mode-desc">Approximate fast — is your answer plausible?</div>
+      </div>
+      <div class="mode-card" data-mode="addition" onclick="selectMode(this)">
+        <span class="mode-icon">➕</span>
+        <div class="mode-name">Addition</div>
+        <div class="mode-desc">Fast mental addition — speed up your number sense</div>
+      </div>
+      <div class="mode-card" data-mode="subtraction" onclick="selectMode(this)">
+        <span class="mode-icon">➖</span>
+        <div class="mode-name">Subtraction</div>
+        <div class="mode-desc">Quick subtraction including negative results</div>
+      </div>
+      <div class="mode-card" data-mode="division" onclick="selectMode(this)">
+        <span class="mode-icon">➗</span>
+        <div class="mode-name">Division</div>
+        <div class="mode-desc">Clean integer division — no remainders</div>
+      </div>
+      <div class="mode-card" data-mode="mixed" onclick="selectMode(this)">
+        <span class="mode-icon">🔀</span>
+        <div class="mode-name">Mixed Drill</div>
+        <div class="mode-desc">All 6 operations — the ultimate daily workout</div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--mid);text-transform:uppercase;">Difficulty</div>
+      <div class="difficulty-row">
+        <button class="diff-btn active" data-diff="easy" onclick="selectDiff(this)">Easy</button>
+        <button class="diff-btn" data-diff="medium" onclick="selectDiff(this)">Medium</button>
+        <button class="diff-btn" data-diff="hard" onclick="selectDiff(this)">Hard</button>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--mid);text-transform:uppercase;">Questions per session</div>
+      <div class="difficulty-row">
+        <button class="diff-btn" data-count="10" onclick="selectCount(this)">10</button>
+        <button class="diff-btn active" data-count="20" onclick="selectCount(this)">20</button>
+        <button class="diff-btn" data-count="30" onclick="selectCount(this)">30</button>
+      </div>
+    </div>
+
+    <button class="start-btn" onclick="startDrill()">Start Drill →</button>
+  </div>
+
+  <!-- DRILL SCREEN -->
+  <div id="screen-drill">
+    <div class="drill-top">
+      <div class="drill-mode-label" id="drill-mode-label">Multiplication</div>
+      <div class="score-pill">
+        <span class="score-correct" id="score-correct">✓ 0</span>
+        <span class="score-wrong" id="score-wrong">✗ 0</span>
+      </div>
+    </div>
+
+    <div class="timer-wrap">
+      <div class="timer-bar-bg"><div class="timer-bar-fill" id="timer-bar"></div></div>
+      <div class="timer-num" id="timer-num">10s</div>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <div class="q-category" id="q-category">—</div>
+      <div class="q-number" id="q-number">1 / 20</div>
+      <div class="question-text" id="question-text">—</div>
+      <div class="question-hint" id="question-hint"></div>
+    </div>
+
+    <div class="trick-panel" id="trick-panel">
+      <div class="trick-icon">💡</div>
+      <div class="trick-body">
+        <div class="trick-label">Tip & Trick</div>
+        <div class="trick-text" id="trick-text"></div>
+      </div>
+    </div>
+
+    <div class="feedback-bar" id="feedback-bar"></div>
+
+    <div class="answer-display" id="answer-display"><span class="placeholder">?</span></div>
+
+    <div class="numpad">
+      <button class="np-btn" onclick="npInput('1')">1</button>
+      <button class="np-btn" onclick="npInput('2')">2</button>
+      <button class="np-btn" onclick="npInput('3')">3</button>
+      <button class="np-btn" onclick="npInput('4')">4</button>
+      <button class="np-btn" onclick="npInput('5')">5</button>
+      <button class="np-btn" onclick="npInput('6')">6</button>
+      <button class="np-btn" onclick="npInput('7')">7</button>
+      <button class="np-btn" onclick="npInput('8')">8</button>
+      <button class="np-btn" onclick="npInput('9')">9</button>
+      <button class="np-btn np-neg" onclick="npToggleSign()">±</button>
+      <button class="np-btn" onclick="npInput('0')">0</button>
+      <button class="np-btn np-del" onclick="npDelete()">⌫</button>
+      <button class="np-btn np-submit" onclick="submitAnswer()">SUBMIT ↵</button>
+    </div>
+
+    <button class="skip-btn" onclick="skipQuestion()">Skip →</button>
+
+    <div class="progress-dots" id="progress-dots"></div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="screen-results">
+    <div class="result-emoji" id="result-emoji">🏆</div>
+    <div class="result-title" id="result-title">Session Complete!</div>
+    <div class="result-sub" id="result-sub">Here's how you did</div>
+
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-val" id="stat-score" style="color:var(--green)">—</div>
+        <div class="stat-label">Correct</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="stat-pct">—</div>
+        <div class="stat-label">Accuracy</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="stat-time" style="color:var(--blue)">—</div>
+        <div class="stat-label">Avg Speed</div>
+      </div>
+    </div>
+
+    <div class="review-list">
+      <div class="review-title">Review</div>
+      <div id="review-items"></div>
+    </div>
+
+    <div class="result-btns">
+      <button class="btn-retry" onclick="startDrill()">Retry Same →</button>
+      <button class="btn-menu" onclick="showMenu()">← Change Mode</button>
+    </div>
+  </div>
+
+  <!-- GUIDE SCREEN -->
+  <div id="screen-guide">
+    <div class="guide-header">
+      <button class="guide-back" onclick="showMenu()">←</button>
+      <div class="guide-title">Master Guide</div>
+    </div>
+
+    <div class="guide-tabs">
+      <button class="gtab active" onclick="switchGuideTab('guidelines',this)">📋 Guidelines</button>
+      <button class="gtab" onclick="switchGuideTab('tricks',this)">⚡ Tricks</button>
+      <button class="gtab" onclick="switchGuideTab('chinese',this)">🏮 Methods</button>
+    </div>
+
+    <!-- TAB 1: GUIDELINES -->
+    <div class="guide-panel active" id="gpanel-guidelines">
+
+      <div class="g-section">
+        <div class="g-section-head">
+          <div class="g-section-icon">🗓️</div>
+          <div><div class="g-section-title">7-Day Training Plan</div><div class="g-section-sub">Optimal weekly schedule for rapid gains</div></div>
+        </div>
+        <div class="week-plan">
+          <div class="week-row"><div class="week-day">MON</div><div class="week-task">Multiplication × Addition — 20 questions each</div><div class="week-badge focus">Core</div></div>
+          <div class="week-row"><div class="week-day">TUE</div><div class="week-task">Squares & Square Roots — slow drill, study each trick</div><div class="week-badge focus">Focus</div></div>
+          <div class="week-row"><div class="week-day">WED</div><div class="week-task">Subtraction × Division — 20 questions each</div><div class="week-badge">Core</div></div>
+          <div class="week-row"><div class="week-day">THU</div><div class="week-task">Powers of 2 × Fractions — critical for CS & AI</div><div class="week-badge focus">STEM</div></div>
+          <div class="week-row"><div class="week-day">FRI</div><div class="week-task">Mixed Drill — Hard mode, 30 questions</div><div class="week-badge focus">Hard</div></div>
+          <div class="week-row"><div class="week-day">SAT</div><div class="week-task">Estimation only — train approximation instinct</div><div class="week-badge">Light</div></div>
+          <div class="week-row"><div class="week-day">SUN</div><div class="week-task">Full Mixed Drill — timed, beat your best score</div><div class="week-badge focus">Test</div></div>
+        </div>
+      </div>
+
+      <div class="g-section">
+        <div class="g-section-head">
+          <div class="g-section-icon">🧠</div>
+          <div><div class="g-section-title">How Your Brain Learns Math</div><div class="g-section-sub">Science-backed principles</div></div>
+        </div>
+        <div class="g-item"><div class="g-bullet">01</div><div class="g-item-body"><strong>Spaced Repetition wins.</strong> 15 min daily beats 2 hours weekly. Your brain consolidates during sleep — drill every day, even lightly.</div></div>
+        <div class="g-item"><div class="g-bullet">02</div><div class="g-item-body"><strong>Time pressure = pattern recognition.</strong> When you're forced to answer in 6s, your brain stops "calculating" and starts "knowing." This is the goal.</div></div>
+        <div class="g-item"><div class="g-bullet">03</div><div class="g-item-body"><strong>Mistakes are the lesson.</strong> Wrong answers trigger stronger memory encoding. Don't skip review — study each incorrect answer for 10 seconds.</div></div>
+        <div class="g-item"><div class="g-bullet">04</div><div class="g-item-body"><strong>Chunk, then compress.</strong> Learn 5×table, then 6×, then 5×6 together. The brain builds <em>number families</em>, not isolated facts.</div></div>
+        <div class="g-item"><div class="g-bullet">05</div><div class="g-item-body"><strong>Verbalize when stuck.</strong> Say the steps aloud: "17 × 8: round to 20 × 8 = 160, minus 3 × 8 = 24, so 136." Vocalization strengthens the neural path.</div></div>
+      </div>
+
+      <div class="g-section">
+        <div class="g-section-head">
+          <div class="g-section-icon">📈</div>
+          <div><div class="g-section-title">Progress Milestones</div><div class="g-section-sub">What mastery looks like at each stage</div></div>
+        </div>
+        <div class="g-item"><div class="g-bullet">WK1</div><div class="g-item-body"><strong>Familiarity:</strong> You can answer every question — slowly. 70%+ accuracy on Easy. Goal: no blanks.</div></div>
+        <div class="g-item"><div class="g-bullet">WK2</div><div class="g-item-body"><strong>Speed emerging:</strong> Easy answers feel automatic. Move to Medium difficulty. Target &lt;8s avg response.</div></div>
+        <div class="g-item"><div class="g-bullet">WK4</div><div class="g-item-body"><strong>Fluency:</strong> Medium feels easy. Hard mode &gt;75% accuracy. You stop "thinking" about ×9 and ×11 tricks.</div></div>
+        <div class="g-item"><div class="g-bullet">WK8</div><div class="g-item-body"><strong>Mastery:</strong> Hard mode &gt;90%, avg &lt;5s. Mixed Drill feels natural. Math in lectures/code no longer slows you down.</div></div>
+      </div>
+
+    </div>
+
+    <!-- TAB 2: TRICKS -->
+    <div class="guide-panel" id="gpanel-tricks">
+
+      <div class="g-section">
+        <div class="g-section-head"><div class="g-section-icon">✖️</div><div><div class="g-section-title">Multiplication Shortcuts</div></div></div>
+        <div class="g-item"><div class="g-bullet">×9</div><div class="g-item-body"><strong>Finger trick:</strong> hold up 10 fingers, fold down the Nth finger. Left = tens, right = units. <em>e.g. 9×7: fold 7th → 6 fingers left, 3 right = 63</em></div></div>
+        <div class="g-item"><div class="g-bullet">×11</div><div class="g-item-body">For 2-digit × 11: <strong>spread digits, put their sum in the middle.</strong> 35×11: 3_(3+5)_5 = 385. If sum &gt;9, carry the 1.</div></div>
+        <div class="g-item"><div class="g-bullet">×5</div><div class="g-item-body"><strong>Halve it, then ×10.</strong> 48×5 = 48÷2 × 10 = 24×10 = <strong>240</strong>. Works instantly for any even number.</div></div>
+        <div class="g-item"><div class="g-bullet">×4</div><div class="g-item-body"><strong>Double twice.</strong> 23×4: 23×2=46, 46×2=<strong>92</strong>.</div></div>
+        <div class="g-item"><div class="g-bullet">×8</div><div class="g-item-body"><strong>Double three times.</strong> 17×8: 17→34→68→<strong>136</strong>.</div></div>
+        <div class="g-item"><div class="g-bullet">×25</div><div class="g-item-body"><strong>Divide by 4, ×100.</strong> 36×25: 36÷4=9, ×100=<strong>900</strong>.</div></div>
+        <div class="g-item"><div class="g-bullet">near²</div><div class="g-item-body"><strong>Difference of squares:</strong> a×b = ((a+b)/2)² − ((a−b)/2)². For 18×22: (20)²−(2)² = 400−4 = <strong>396</strong>.</div></div>
+      </div>
+
+      <div class="g-section">
+        <div class="g-section-head"><div class="g-section-icon">➕</div><div><div class="g-section-title">Addition & Subtraction</div></div></div>
+        <div class="g-item"><div class="g-bullet">ADD</div><div class="g-item-body"><strong>Round-and-adjust:</strong> 487+356 → 487+400=887, −44=<strong>843</strong>. Round to nearest 50 or 100, then correct.</div></div>
+        <div class="g-item"><div class="g-bullet">ADD</div><div class="g-item-body"><strong>Left-to-right:</strong> Don't carry — add hundreds first, then tens, then units. 643+281: 800+120+4 = <strong>924</strong>.</div></div>
+        <div class="g-item"><div class="g-bullet">SUB</div><div class="g-item-body"><strong>Counting up (Austrian method):</strong> 83−47: count from 47 → 50 (+3) → 83 (+33) = <strong>36</strong>. Faster than borrowing.</div></div>
+        <div class="g-item"><div class="g-bullet">SUB</div><div class="g-item-body"><strong>Round the subtrahend:</strong> 524−198 → 524−200=324, +2=<strong>326</strong>. If subtracting near-round numbers, overshoot and add back.</div></div>
+      </div>
+
+      <div class="g-section">
+        <div class="g-section-head"><div class="g-section-icon">²</div><div><div class="g-section-title">Squares & Roots</div></div></div>
+        <div class="g-item"><div class="g-bullet">n5²</div><div class="g-item-body"><strong>Numbers ending in 5:</strong> take the first digit(s), multiply by next integer, append 25. 75²: 7×8=56 → <strong>5625</strong>.</div></div>
+        <div class="g-item"><div class="g-bullet">±1</div><div class="g-item-body"><strong>Near-square trick:</strong> (n+1)² = n² + 2n + 1. Know 20²=400? Then 21²=400+40+1=<strong>441</strong>.</div></div>
+        <div class="g-item"><div class="g-bullet">√est</div><div class="g-item-body"><strong>Bracket method:</strong> find two perfect squares it sits between. √200: 14²=196, 15²=225 → answer is just above <strong>14</strong>.</div></div>
+        <div class="g-item"><div class="g-bullet">√</div><div class="g-item-body"><strong>Digit-sum check:</strong> perfect squares only end in 0,1,4,5,6,9. If the number ends in 2,3,7,8 — it has no integer square root.</div></div>
+      </div>
+
+      <div class="g-section">
+        <div class="g-section-head"><div class="g-section-icon">💻</div><div><div class="g-section-title">Powers of 2 (CS Essential)</div></div></div>
+        <div class="g-item"><div class="g-bullet">KEY</div><div class="g-item-body"><strong>Anchor points to memorise:</strong> 2¹⁰=1024 (≈1K), 2²⁰≈1M, 2³⁰≈1B. Everything else is a doubling or halving from these.</div></div>
+        <div class="g-item"><div class="g-bullet">TIP</div><div class="g-item-body"><strong>Build a chain:</strong> 2⁰=1, ×2 each step. Recite the chain daily: 1,2,4,8,16,32,64,128,256,512,1024…</div></div>
+        <div class="g-item"><div class="g-bullet">USE</div><div class="g-item-body">In CS: array sizes, memory addresses, hash table buckets, and tree depths are all powers of 2. <strong>Knowing them cold = instant code intuition.</strong></div></div>
+      </div>
+
+    </div>
+
+    <!-- TAB 3: CHINESE / ANCIENT METHODS -->
+    <div class="guide-panel" id="gpanel-chinese">
+
+      <div style="background:var(--faint);border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:var(--mid);line-height:1.6;">
+        These are real techniques used across East Asian mathematics education and ancient computational systems — many still taught in elite schools today for developing extraordinary mental speed.
+      </div>
+
+      <div class="technique-card">
+        <div class="tc-header">
+          <div class="tc-num">01</div>
+          <div><div class="tc-title">Suànpán — Abacus Mental Imaging</div><div class="tc-origin">中国算盘 · Chinese Abacus Method</div></div>
+        </div>
+        <div class="tc-body">The most powerful mental math system in the world. Students first learn the physical abacus, then visualize it internally. Top students can add 15-digit numbers in seconds — purely mentally.</div>
+        <div class="tc-steps">
+          <div class="tc-step"><div class="tc-step-num">01.</div>Learn the abacus bead positions: each column = a power of 10, top bead = 5, bottom beads = 1 each.</div>
+          <div class="tc-step"><div class="tc-step-num">02.</div>Practice adding numbers by mentally "moving beads" — visualize the abacus as a grid in your mind.</div>
+          <div class="tc-step"><div class="tc-step-num">03.</div>Train with real problems: instead of calculating 347+289, see the beads shifting. Speed follows visualization.</div>
+          <div class="tc-step"><div class="tc-step-num">04.</div>Apply here: when adding large numbers in Estimation mode, mentally picture column-by-column bead movement.</div>
+        </div>
+      </div>
+
+      <div class="technique-card">
+        <div class="tc-header">
+          <div class="tc-num">02</div>
+          <div><div class="tc-title">Vedic Mathematics — Sutras</div><div class="tc-origin">वैदिक गणित · Ancient Indian System</div></div>
+        </div>
+        <div class="tc-body">A system of 16 sutras (formulas) from ancient Sanskrit texts that reduce complex calculations to single-line mental operations. Widely used in East Asian competition math.</div>
+        <div class="tc-steps">
+          <div class="tc-step"><div class="tc-step-num">01.</div><strong style="color:var(--gold)">Nikhilam</strong> (All from 9, last from 10): For multiplying numbers near 100 — e.g. 97×96: deficits are 3 and 4. Answer: (97−4) | (3×4) = 93|12 = <strong style="color:#fff">9312</strong>.</div>
+          <div class="tc-step"><div class="tc-step-num">02.</div><strong style="color:var(--gold)">Anurupyena</strong> (Proportionality): Scale to a base, multiply, scale back. 48×47: use base 50, adjustments −2 and −3 → (50−5)|(2×3) = 45|06 = <strong style="color:#fff">2256</strong>.</div>
+          <div class="tc-step"><div class="tc-step-num">03.</div><strong style="color:var(--gold)">Vertically & Crosswise</strong>: Multiply 2-digit × 2-digit in one pass. 23×41: (2×4)|(2×1+3×4)|(3×1) = 8|14|3 = carry → <strong style="color:#fff">943</strong>.</div>
+          <div class="tc-step"><div class="tc-step-num">04.</div>Practice one sutra per week until it's reflex. Then combine. Competition students master all 16 in 6 months.</div>
+        </div>
+      </div>
+
+      <div class="technique-card">
+        <div class="tc-header">
+          <div class="tc-num">03</div>
+          <div><div class="tc-title">Shadow Calculation — 暗算 (Àn Suàn)</div><div class="tc-origin">暗算 · Chinese Mental Arithmetic</div></div>
+        </div>
+        <div class="tc-body">Literally "dark calculation" — computing entirely in your head without writing or tools. Chinese primary schools run national competitions. The method: left-to-right processing with a running total stored in working memory.</div>
+        <div class="tc-steps">
+          <div class="tc-step"><div class="tc-step-num">01.</div>Always process <strong style="color:var(--gold)">left to right</strong> (biggest place value first). This lets you produce an approximate answer instantly and refine it.</div>
+          <div class="tc-step"><div class="tc-step-num">02.</div>Hold the <strong style="color:var(--gold)">running total in memory</strong> as a single number — never as partial sums. 346+279: hold "300", add 40→"340" add 200→"540", add 70→"610", add 9+6→<strong style="color:#fff">625</strong>.</div>
+          <div class="tc-step"><div class="tc-step-num">03.</div>Train memory capacity: start with 3-digit additions, move to 4, then 5. The working memory expands with practice.</div>
+          <div class="tc-step"><div class="tc-step-num">04.</div>Apply here: use the Hard difficulty + short timer to simulate competition-level暗算 pressure.</div>
+        </div>
+      </div>
+
+      <div class="technique-card">
+        <div class="tc-header">
+          <div class="tc-num">04</div>
+          <div><div class="tc-title">Korean Chunking — 구구단 Mastery</div><div class="tc-origin">구구단 · Korean Times Table Method</div></div>
+        </div>
+        <div class="tc-body">Korean students memorize the entire 9×9 table as a rhythmic chant (구구단) from age 5-7. The key insight: <em>rhythm encodes better than visual memorization</em>. Numbers become music.</div>
+        <div class="tc-steps">
+          <div class="tc-step"><div class="tc-step-num">01.</div>Set each times table to a rhythm or beat. Say "7×8=56" with a clap pattern until the sound triggers the answer, not the calculation.</div>
+          <div class="tc-step"><div class="tc-step-num">02.</div>Group tables by difficulty: easy (×1,×2,×5,×10), medium (×3,×4,×6), hard (×7,×8,×9). Master easy first, drill hard daily.</div>
+          <div class="tc-step"><div class="tc-step-num">03.</div>Use the <strong style="color:var(--gold)">commutative shortcut</strong>: you only need to know 45 unique facts (not 81) since 7×8 = 8×7. This halves the memorization load.</div>
+          <div class="tc-step"><div class="tc-step-num">04.</div>Test: say the entire 7× table aloud in under 10 seconds. That's the Korean school benchmark for mastery.</div>
+        </div>
+      </div>
+
+      <div class="technique-card">
+        <div class="tc-header">
+          <div class="tc-num">05</div>
+          <div><div class="tc-title">Japanese Soroban Flash Method</div><div class="tc-origin">そろばん · Japanese Flash Anzan</div></div>
+        </div>
+        <div class="tc-body">Flash Anzan (フラッシュ暗算) is the extreme version: numbers flash on screen for 0.2 seconds each, and trained students sum 15 numbers in under 2 seconds. The technique builds an internal number sense that transfers to all STEM work.</div>
+        <div class="tc-steps">
+          <div class="tc-step"><div class="tc-step-num">01.</div>Begin with slow flash: see a number for 1 second, add it to your running total, see the next. Start with 5 numbers.</div>
+          <div class="tc-step"><div class="tc-step-num">02.</div>Reduce exposure time weekly: 1s → 0.5s → 0.3s. The goal is to bypass verbal processing and respond numerically.</div>
+          <div class="tc-step"><div class="tc-step-num">03.</div>The key principle: <strong style="color:var(--gold)">don't name the number in your head</strong>. Just feel its magnitude. This activates the brain's spatial-numeric sense, not language.</div>
+          <div class="tc-step"><div class="tc-step-num">04.</div>Apply here: on Mixed Drill Hard mode, try to answer before consciously "thinking" — train the gut-feel response.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── STATE ──
+let selectedMode = 'multiplication';
+let selectedDiff = 'easy';
+let selectedCount = 20;
+let questions = [];
+let currentQ = 0;
+let correct = 0;
+let wrong = 0;
+let streak = 0;
+let timerInterval = null;
+let timeLeft = 10;
+let timeLimit = 10;
+let questionStartTime = 0;
+let totalTime = 0;
+let results = [];
+
+// ── QUESTION GENERATORS ──
+const GENERATORS = {
+  addition: (diff) => {
+    const ranges = { easy: [1,50], medium: [10,200], hard: [50,999] };
+    const [lo, hi] = ranges[diff];
+    const a = rand(lo, hi), b = rand(lo, hi);
+    const trick = trickFor.addition(a, b);
+    return { q: `${a} + ${b}`, ans: a + b, cat: 'Addition', hint: '', trick };
+  },
+  subtraction: (diff) => {
+    const ranges = { easy: [1,50], medium: [10,200], hard: [50,999] };
+    const [lo, hi] = ranges[diff];
+    let a = rand(lo, hi), b = rand(lo, hi);
+    if (diff === 'easy' && b > a) [a, b] = [b, a];
+    const trick = trickFor.subtraction(a, b);
+    return { q: `${a} − ${b}`, ans: a - b, cat: 'Subtraction', hint: '', trick };
+  },
+  division: (diff) => {
+    const ranges = { easy: [1,10], medium: [2,15], hard: [3,20] };
+    const [lo, hi] = ranges[diff];
+    const b = rand(lo, hi);
+    const ans = rand(lo, hi);
+    const a = b * ans;
+    const trick = trickFor.division(a, b, ans);
+    return { q: `${a} ÷ ${b}`, ans, cat: 'Division', hint: 'integer answer', trick };
+  },
+  multiplication: (diff) => {
+    const ranges = { easy: [2,10], medium: [2,15], hard: [6,20] };
+    const [lo, hi] = ranges[diff];
+    const a = rand(lo, hi), b = rand(lo, hi);
+    const trick = trickFor.multiplication(a, b);
+    return { q: `${a} × ${b}`, ans: a*b, cat: 'Multiplication', hint: '', trick };
+  },
+  squares: (diff) => {
+    if (Math.random() < 0.5) {
+      const ranges = { easy: [2,12], medium: [2,20], hard: [10,30] };
+      const [lo,hi] = ranges[diff];
+      const n = rand(lo, hi);
+      const trick = trickFor.square(n);
+      return { q: `${n}²`, ans: n*n, cat: 'Squares', hint: 'n × n', trick };
+    } else {
+      const bases = { easy: [1,4,9,16,25,36,49,64,81,100], medium: [1,4,9,16,25,36,49,64,81,100,121,144,169,196,225], hard: [1,4,9,16,25,36,49,64,81,100,121,144,169,196,225,256,289,324,361,400,441,484,529,576,625] };
+      const list = bases[diff];
+      const n2 = list[rand(0, list.length-1)];
+      const root = Math.round(Math.sqrt(n2));
+      return { q: `√${n2}`, ans: root, cat: 'Square Roots', hint: 'integer root', trick: `Ask: <strong>what number × itself = ${n2}?</strong> Work from nearby perfect squares you know.` };
+    }
+  },
+  powers2: (diff) => {
+    const ranges = { easy: [0,8], medium: [0,12], hard: [0,16] };
+    const [lo,hi] = ranges[diff];
+    const n = rand(lo, hi);
+    const trick = trickFor.powers2(n);
+    return { q: `2^${n}`, ans: Math.pow(2,n), cat: 'Powers of 2', hint: 'binary fluency', trick };
+  },
+  fractions: (diff) => {
+    const sets = {
+      easy: [
+        {q:'1/2',a:0.5,trick:'Divide by 2. Half of anything.'},
+        {q:'1/4',a:0.25,trick:'Half of a half. Divide by 4, or halve twice.'},
+        {q:'3/4',a:0.75,trick:'1 − 1/4 = 1 − 0.25 = <strong>0.75</strong>'},
+        {q:'1/3',a:0.333,trick:'Repeating: <strong>0.333…</strong> — think "33 cents per dollar"'},
+        {q:'2/3',a:0.667,trick:'1 − 1/3 = 1 − 0.333 = <strong>0.667</strong>'},
+        {q:'1/5',a:0.2,trick:'Divide by 5 = multiply by 2, then ÷10. 1×2=2 → <strong>0.2</strong>'},
+        {q:'2/5',a:0.4,trick:'2 × 0.2 = <strong>0.4</strong>'},
+        {q:'3/5',a:0.6,trick:'3 × 0.2 = <strong>0.6</strong>'},
+        {q:'4/5',a:0.8,trick:'1 − 1/5 = 1 − 0.2 = <strong>0.8</strong>'}
+      ],
+      medium: [
+        {q:'1/6',a:0.167,trick:'1/6 = 1/2 × 1/3 = 0.5 × 0.333 ≈ <strong>0.167</strong>'},
+        {q:'5/6',a:0.833,trick:'1 − 1/6 = 1 − 0.167 = <strong>0.833</strong>'},
+        {q:'1/8',a:0.125,trick:'Half of 1/4: 0.25 ÷ 2 = <strong>0.125</strong>'},
+        {q:'3/8',a:0.375,trick:'3 × 0.125 = <strong>0.375</strong>'},
+        {q:'5/8',a:0.625,trick:'1/2 + 1/8 = 0.5 + 0.125 = <strong>0.625</strong>'},
+        {q:'7/8',a:0.875,trick:'1 − 1/8 = 1 − 0.125 = <strong>0.875</strong>'},
+        {q:'1/9',a:0.111,trick:'Repeating 1s: <strong>0.111…</strong> — every 9th is this pattern'},
+        {q:'2/9',a:0.222,trick:'2 × 0.111 = <strong>0.222…</strong>'}
+      ],
+      hard: [
+        {q:'1/7',a:0.143,trick:'Memorise the cycle: 1/7 = <strong>0.142857</strong> repeating'},
+        {q:'2/7',a:0.286,trick:'2 × 0.143 ≈ <strong>0.286</strong> (same digit cycle, shifted)'},
+        {q:'3/7',a:0.429,trick:'3 × 0.143 ≈ <strong>0.429</strong>'},
+        {q:'1/11',a:0.091,trick:'Repeating 09: <strong>0.0909…</strong>'},
+        {q:'1/12',a:0.083,trick:'1/6 ÷ 2 = 0.167 ÷ 2 = <strong>0.083</strong>'},
+        {q:'5/12',a:0.417,trick:'5 × 0.083 ≈ <strong>0.417</strong>'},
+        {q:'7/12',a:0.583,trick:'1/2 + 1/12 = 0.5 + 0.083 = <strong>0.583</strong>'},
+        {q:'1/16',a:0.0625,trick:'Half of 1/8: 0.125 ÷ 2 = <strong>0.0625</strong>'}
+      ]
+    };
+    const pool = sets[diff];
+    const item = pool[rand(0, pool.length-1)];
+    return { q: item.q + ' = ?', ans: item.a, cat: 'Fractions → Decimal', hint: 'round to 3 dp', tol: 0.01, trick: item.trick };
+  },
+  estimation: (diff) => {
+    const ops = [
+      () => { const a=rand(10,999), b=rand(10,999); const tol=diff==='easy'?5:diff==='medium'?20:50; return {q:`${a} + ${b}`, ans:a+b, tol, trick:`Round both to nearest 10: <strong>${Math.round(a/10)*10} + ${Math.round(b/10)*10}</strong>, then adjust.`}; },
+      () => { const a=rand(10,99), b=rand(2,9); const tol=diff==='easy'?2:diff==='medium'?10:25; return {q:`${a} × ${b}`, ans:a*b, tol, trick:`Round ${a} to nearest 10, multiply, then correct: <strong>${Math.round(a/10)*10} × ${b} = ${Math.round(a/10)*10*b}</strong>.`}; },
+      () => { const a=rand(100,9999); const tol=diff==='easy'?1:2; return {q:`√${a} ≈`, ans:Math.sqrt(a), tol, trick:`Find nearest perfect square. √${Math.pow(Math.round(Math.sqrt(a)),2)} = <strong>${Math.round(Math.sqrt(a))}</strong>, then fine-tune.`}; },
+      () => { const a=rand(10,100), b=rand(10,100); const tol=diff==='easy'?1:3; return {q:`${a}% of ${b}`, ans:a*b/100, tol, trick:`Swap if easier: ${b}% of ${a}. Or: 10% = ${(b/10).toFixed(1)}, scale up.`}; },
+    ];
+    const gen = ops[rand(0, ops.length-1)]();
+    return { ...gen, cat: 'Estimation', hint: `within ±${gen.tol}` };
+  },
+  mixed: (diff) => {
+    const modes = ['addition','subtraction','multiplication','division','squares','powers2','fractions','estimation'];
+    return GENERATORS[modes[rand(0, modes.length-1)]](diff);
+  }
+};
+
+// ── TRICK ENGINE ──
+const trickFor = {
+  addition(a, b) {
+    if (b % 10 === 0 || a % 10 === 0) return `One number is a round multiple of 10 — add directly: <strong>${a} + ${b}</strong> is straightforward.`;
+    const roundB = Math.round(b / 10) * 10, diff2 = b - roundB;
+    if (Math.abs(diff2) <= 2) return `Round ${b} to <strong>${roundB}</strong>, add, then ${diff2 >= 0 ? 'subtract' : 'add'} <strong>${Math.abs(diff2)}</strong>.`;
+    const tens = Math.floor(a/10)*10, ones = a%10;
+    return `Split: <strong>${tens} + ${b} = ${tens+b}</strong>, then add <strong>${ones}</strong> → ${tens+b+ones}.`;
+  },
+  subtraction(a, b) {
+    if (b % 10 === 0) return `${b} is a round number — subtract directly from ${a}.`;
+    const roundB = Math.ceil(b/10)*10;
+    return `Round ${b} up to <strong>${roundB}</strong>, subtract → ${a-roundB}, then add back <strong>${roundB-b}</strong>.`;
+  },
+  multiplication(a, b) {
+    const [lo, hi] = a < b ? [a,b] : [b,a];
+    if (hi === 11) return `× 11 trick: write the digits with their sum in the middle. e.g. ${lo} × 11: spread and sum.`;
+    if (hi === 5) return `× 5 = ÷ 2 then × 10. ${lo} ÷ 2 = ${lo/2} → × 10 = <strong>${lo*5}</strong>.`;
+    if (hi === 9) return `× 9 = × 10 − the number. ${lo} × 10 = ${lo*10} − ${lo} = <strong>${lo*9}</strong>.`;
+    if (hi === 4) return `× 4 = double twice. ${lo} × 2 = ${lo*2}, × 2 again = <strong>${lo*4}</strong>.`;
+    if (hi === 8) return `× 8 = double three times. ${lo} → ${lo*2} → ${lo*4} → <strong>${lo*8}</strong>.`;
+    if (lo % 10 === 0 || hi % 10 === 0) return `One factor is a multiple of 10 — just multiply by the tens digit and add a zero.`;
+    return `Break it up: <strong>${lo} × ${Math.floor(hi/10)*10}</strong> + <strong>${lo} × ${hi%10}</strong> = ${lo*Math.floor(hi/10)*10} + ${lo*(hi%10)}.`;
+  },
+  division(a, b, ans) {
+    if (b === 2) return `÷ 2 = halving. <strong>${a} ÷ 2 = ${ans}</strong>. Is it even? Yes → divide.`;
+    if (b === 5) return `÷ 5 = ÷ 10 × 2. <strong>${a} ÷ 10 = ${a/10}</strong>, × 2 = <strong>${ans}</strong>.`;
+    if (b === 4) return `÷ 4 = halve twice. <strong>${a} ÷ 2 = ${a/2}</strong>, ÷ 2 = <strong>${ans}</strong>.`;
+    if (b === 9) return `Think: what × 9 = ${a}? Use × 9 trick in reverse.`;
+    return `Think multiplication: <strong>? × ${b} = ${a}</strong>. Count up from ${b}.`;
+  },
+  square(n) {
+    if (n <= 10) return `Memorise perfect squares up to 10². <strong>${n}² = ${n*n}</strong> — drill this until instant.`;
+    if (n % 10 === 5) { const d = Math.floor(n/10); return `×5 ending trick: (${d} × ${d+1}) follow by 25. → <strong>${d*(d+1)}25</strong>.`; }
+    const near = Math.round(n/10)*10;
+    const diff3 = n - near;
+    return `Use (a+b)²: near round number <strong>${near}</strong>. (${near}${diff3>=0?'+':''}${diff3})² = ${near}² ${diff3>=0?'+':'-'} 2×${near}×${Math.abs(diff3)} + ${diff3}² = <strong>${n*n}</strong>.`;
+  },
+  powers2(n) {
+    if (n === 0) return `Any number to the power 0 = <strong>1</strong>. Always.`;
+    if (n === 1) return `2¹ = <strong>2</strong>. The base itself.`;
+    if (n <= 4) return `Double from the previous: 2^${n-1}=${Math.pow(2,n-1)} × 2 = <strong>${Math.pow(2,n)}</strong>.`;
+    if (n === 10) return `2^10 = <strong>1024</strong> ≈ 1K. A CS landmark to memorise!`;
+    if (n >= 10) { const diff4 = n-10; return `Anchor at 2^10 = 1024, then × ${Math.pow(2,diff4)}: 1024 × ${Math.pow(2,diff4)} = <strong>${Math.pow(2,n)}</strong>.`; }
+    return `Build from 2^${n-1} = ${Math.pow(2,n-1)}: double it → <strong>${Math.pow(2,n)}</strong>.`;
+  }
+};
+
+// ── NUMPAD STATE ──
+let npValue = '';
+
+function npInput(digit) {
+  if (npValue.replace('-','').length >= 6) return;
+  npValue += digit;
+  renderDisplay();
+}
+function npToggleSign() {
+  if (npValue.startsWith('-')) npValue = npValue.slice(1);
+  else if (npValue.length > 0) npValue = '-' + npValue;
+  renderDisplay();
+}
+function npDelete() {
+  npValue = npValue.slice(0, -1);
+  renderDisplay();
+}
+function npClear() {
+  npValue = '';
+  renderDisplay();
+}
+function renderDisplay() {
+  const el = document.getElementById('answer-display');
+  if (npValue === '' || npValue === '-') {
+    el.innerHTML = '<span class="placeholder">?</span>';
+    el.classList.remove('has-value');
+  } else {
+    el.textContent = npValue;
+    el.classList.add('has-value');
+  }
+}
+
+let trickTimeout = null;
+
+function showTrick(text) {
+  if (!text) return;
+  document.getElementById('trick-text').innerHTML = text;
+  document.getElementById('trick-panel').classList.add('visible');
+}
+function hideTrick() {
+  clearTimeout(trickTimeout);
+  document.getElementById('trick-panel').classList.remove('visible');
+}
+
+function rand(lo, hi) { return Math.floor(Math.random() * (hi - lo + 1)) + lo; }
+
+// ── UI HELPERS ──
+function show(id) {
+  ['screen-menu','screen-drill','screen-results','screen-guide'].forEach(s => {
+    const el = document.getElementById(s);
+    el.style.display = 'none';
+  });
+  const target = document.getElementById(id);
+  // menu and guide are flex-column, drill and results are block
+  if (id === 'screen-menu' || id === 'screen-guide') {
+    target.style.display = 'flex';
+    target.style.flexDirection = 'column';
+  } else {
+    target.style.display = 'block';
+  }
+}
+
+function showGuide() { show('screen-guide'); }
+function showMenu() { show('screen-menu'); }
+
+function switchGuideTab(name, btn) {
+  document.querySelectorAll('.gtab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.guide-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('gpanel-' + name).classList.add('active');
+}
+
+function selectMode(el) {
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMode = el.dataset.mode;
+}
+function selectDiff(el) {
+  document.querySelectorAll('.diff-btn[data-diff]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  selectedDiff = el.dataset.diff;
+}
+function selectCount(el) {
+  document.querySelectorAll('.diff-btn[data-count]').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  selectedCount = parseInt(el.dataset.count);
+}
+
+// ── DRILL LOGIC ──
+function startDrill() {
+  // generate questions
+  questions = [];
+  for (let i = 0; i < selectedCount; i++) {
+    questions.push(GENERATORS[selectedMode](selectedDiff));
+  }
+  currentQ = 0; correct = 0; wrong = 0; results = [];
+  totalTime = 0;
+
+  timeLimit = selectedDiff === 'easy' ? 12 : selectedDiff === 'medium' ? 9 : 6;
+
+  // build dots
+  const dots = document.getElementById('progress-dots');
+  dots.innerHTML = '';
+  questions.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i===0 ? ' current' : '');
+    d.id = `dot-${i}`;
+    dots.appendChild(d);
+  });
+
+  updateScoreDisplay();
+  document.getElementById('drill-mode-label').textContent = modeName(selectedMode);
+  show('screen-drill');
+  loadQuestion();
+}
+
+function modeName(m) {
+  return {addition:'Addition',subtraction:'Subtraction',multiplication:'Multiplication',division:'Division',squares:'Squares & Roots',powers2:'Powers of 2',fractions:'Fractions',estimation:'Estimation',mixed:'Mixed Drill'}[m];
+}
+
+function loadQuestion() {
+  if (currentQ >= questions.length) { endDrill(); return; }
+  const q = questions[currentQ];
+
+  document.getElementById('question-text').textContent = q.q;
+  document.getElementById('q-category').textContent = q.cat;
+  document.getElementById('q-number').textContent = `${currentQ+1} / ${questions.length}`;
+  document.getElementById('question-hint').textContent = q.hint || '';
+  npClear();
+
+  hideFeedback();
+  hideTrick();
+  document.getElementById('question-card').classList.remove('correct-flash','wrong-flash');
+
+  startTimer();
+  questionStartTime = Date.now();
+
+  // Show trick after 3s
+  trickTimeout = setTimeout(() => showTrick(q.trick), 3000);
+
+  document.getElementById('question-card').classList.add('pop');
+  setTimeout(() => document.getElementById('question-card').classList.remove('pop'), 300);
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  timeLeft = timeLimit;
+  updateTimerUI();
+  timerInterval = setInterval(() => {
+    timeLeft -= 0.1;
+    if (timeLeft <= 0) {
+      timeLeft = 0;
+      updateTimerUI();
+      clearInterval(timerInterval);
+      handleTimeout();
+    } else {
+      updateTimerUI();
+    }
+  }, 100);
+}
+
+function updateTimerUI() {
+  const pct = (timeLeft / timeLimit) * 100;
+  const bar = document.getElementById('timer-bar');
+  bar.style.width = pct + '%';
+  bar.classList.toggle('danger', timeLeft < timeLimit * 0.3);
+  document.getElementById('timer-num').textContent = Math.ceil(timeLeft) + 's';
+}
+
+function handleTimeout() {
+  const q = questions[currentQ];
+  wrong++;
+  streak = 0;
+  updateStreak();
+  results.push({ q: q.q, ans: q.ans, given: '—', correct: false, time: timeLimit });
+  showFeedback(false, `Time! Answer: ${formatAns(q.ans)}`);
+  markDot(currentQ, false);
+  currentQ++;
+  updateScoreDisplay();
+  setTimeout(() => { hideFeedback(); loadQuestion(); }, 1100);
+}
+
+function submitAnswer() {
+  clearInterval(timerInterval);
+  const val = npValue.trim();
+  if (val === '' || val === '-') { startTimer(); return; }
+
+  const elapsed = (Date.now() - questionStartTime) / 1000;
+  totalTime += elapsed;
+
+  const q = questions[currentQ];
+  const given = parseFloat(val);
+  const tol = q.tol || 0;
+  const isCorrect = Math.abs(given - q.ans) <= Math.max(tol, 0.001);
+
+  results.push({ q: q.q, ans: q.ans, given: val, correct: isCorrect, time: elapsed });
+
+  if (isCorrect) {
+    correct++;
+    streak++;
+    updateStreak();
+    markDot(currentQ, true);
+    showFeedback(true, streak >= 3 ? `✓ Correct! 🔥 ${streak} streak` : '✓ Correct!');
+    document.getElementById('question-card').classList.add('correct-flash');
+  } else {
+    wrong++;
+    streak = 0;
+    updateStreak();
+    markDot(currentQ, false);
+    showFeedback(false, `✗ Answer: ${formatAns(q.ans)}`);
+    document.getElementById('question-card').classList.add('wrong-flash');
+    document.getElementById('question-card').classList.add('shake');
+    setTimeout(() => document.getElementById('question-card').classList.remove('shake'), 400);
+  }
+
+  currentQ++;
+  updateScoreDisplay();
+  setTimeout(() => { hideFeedback(); loadQuestion(); }, 1000);
+}
+
+function skipQuestion() {
+  clearInterval(timerInterval);
+  const q = questions[currentQ];
+  wrong++;
+  streak = 0;
+  updateStreak();
+  results.push({ q: q.q, ans: q.ans, given: 'skip', correct: false, time: timeLimit });
+  markDot(currentQ, false);
+  currentQ++;
+  updateScoreDisplay();
+  loadQuestion();
+}
+
+function formatAns(a) {
+  if (typeof a === 'number' && !Number.isInteger(a)) return a.toFixed(3);
+  return a;
+}
+
+function showFeedback(ok, msg) {
+  const fb = document.getElementById('feedback-bar');
+  fb.textContent = msg;
+  fb.className = 'feedback-bar show ' + (ok ? 'correct' : 'wrong');
+}
+function hideFeedback() {
+  document.getElementById('feedback-bar').className = 'feedback-bar';
+}
+
+function markDot(i, ok) {
+  const d = document.getElementById(`dot-${i}`);
+  if (d) d.className = 'dot ' + (ok ? 'done-correct' : 'done-wrong');
+  const next = document.getElementById(`dot-${i+1}`);
+  if (next) next.className = 'dot current';
+}
+
+function updateScoreDisplay() {
+  document.getElementById('score-correct').textContent = `✓ ${correct}`;
+  document.getElementById('score-wrong').textContent = `✗ ${wrong}`;
+}
+
+function updateStreak() {
+  document.getElementById('streak-count').textContent = streak;
+}
+
+// ── END & RESULTS ──
+function endDrill() {
+  clearInterval(timerInterval);
+  const pct = Math.round((correct / questions.length) * 100);
+  const avgTime = results.length ? (totalTime / results.length).toFixed(1) : '—';
+
+  document.getElementById('stat-score').textContent = `${correct}/${questions.length}`;
+  document.getElementById('stat-pct').textContent = pct + '%';
+  document.getElementById('stat-time').textContent = avgTime + 's';
+
+  let emoji = '😤', title = 'Keep grinding!', sub = 'Practice makes perfect.';
+  if (pct >= 90) { emoji = '🏆'; title = 'Outstanding!'; sub = 'You\'re building real speed.'; }
+  else if (pct >= 75) { emoji = '🔥'; title = 'Great work!'; sub = 'Almost mastered this level.'; }
+  else if (pct >= 50) { emoji = '💪'; title = 'Good effort!'; sub = 'Push through the tough ones.'; }
+  document.getElementById('result-emoji').textContent = emoji;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = `${pct}% accuracy · avg ${avgTime}s per question`;
+
+  // review items (show wrong first)
+  const reviewEl = document.getElementById('review-items');
+  reviewEl.innerHTML = '';
+  const sorted = [...results].sort((a,b) => a.correct - b.correct);
+  sorted.slice(0, 12).forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'review-item ' + (r.correct ? 'ri-correct' : 'ri-wrong');
+    div.innerHTML = `
+      <span class="review-q">${r.q}</span>
+      <span class="review-a">${r.correct ? `✓ ${formatAns(r.ans)}` : `You: ${r.given} → ${formatAns(r.ans)}`}</span>
+      <span class="review-icon">${r.correct ? '✓' : '✗'}</span>
+    `;
+    reviewEl.appendChild(div);
+  });
+
+  show('screen-results');
+}
+
+// ── KEYBOARD SUPPORT (desktop) ──
+document.addEventListener('keydown', e => {
+  if (document.getElementById('screen-drill').style.display === 'none') return;
+  if (e.key >= '0' && e.key <= '9') npInput(e.key);
+  else if (e.key === '-') npToggleSign();
+  else if (e.key === 'Backspace') npDelete();
+  else if (e.key === 'Enter') submitAnswer();
+});
+
+// init
+show('screen-menu');
+</script>
 </body>
 </html>
-
